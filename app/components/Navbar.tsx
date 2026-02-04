@@ -2,6 +2,8 @@
 
 import { Search, Menu, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ROUTES } from "@/app/routes";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -23,14 +25,14 @@ export default function Navbar() {
         >
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 {/* Logo */}
-                <div className="flex items-center gap-2">
+                <Link href={ROUTES.HOME} className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center">
                         <span className="text-white font-bold text-xl">M</span>
                     </div>
                     <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
                         MovieBook
                     </span>
-                </div>
+                </Link>
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
@@ -44,6 +46,10 @@ export default function Navbar() {
                         <Search className="w-5 h-5" />
                     </button>
 
+                    <Link href={ROUTES.SIGNUP} className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
+                        Sign Up
+                    </Link>
+
                     <button className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
                         Sign In
                     </button>
@@ -56,3 +62,4 @@ export default function Navbar() {
         </nav>
     );
 }
+
