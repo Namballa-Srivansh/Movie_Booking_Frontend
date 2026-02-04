@@ -4,8 +4,10 @@ import { Search, Menu, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function Navbar() {
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -46,13 +48,33 @@ export default function Navbar() {
                         <Search className="w-5 h-5" />
                     </button>
 
-                    <Link href={ROUTES.SIGNUP} className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
-                        Sign Up
-                    </Link>
+                    {isLoading ? null : isAuthenticated ? (
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={logout}
+                                className="px-5 py-2 rounded-full border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-all"
+                            >
+                                Logout
+                            </button>
+                            <button className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5">
+                                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                                    <span className="text-indigo-600 font-bold text-lg">
+                                        {user?.email?.charAt(0).toUpperCase() || "U"}
+                                    </span>
+                                </div>
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <Link href={ROUTES.SIGNUP} className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
+                                Sign Up
+                            </Link>
 
-                    <button className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
-                        Sign In
-                    </button>
+                            <Link href={ROUTES.LOGIN} className="hidden sm:block px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-sm hover:shadow transition-all">
+                                Sign In
+                            </Link>
+                        </>
+                    )}
 
                     <button className="md:hidden p-2 text-slate-600 hover:text-indigo-600">
                         <Menu className="w-6 h-6" />

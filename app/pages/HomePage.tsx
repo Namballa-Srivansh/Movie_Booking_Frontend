@@ -88,7 +88,7 @@ export default function HomePage() {
                         transition={{ duration: 0.8 }}
                         className="max-w-3xl"
                     >
-                        <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-semibold border border-indigo-500/20 mb-6 backdrop-blur-sm">
+                        <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/20 text-indigo-600 text-sm font-semibold border border-indigo-500/20 mb-6 backdrop-blur-sm">
                             The Future of Cinema
                         </span>
                         <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 leading-tight mb-6 tracking-tight">

@@ -2,43 +2,28 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Chrome, ChevronDown, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { ROUTES } from "@/app/routes";
 import { useRouter } from "next/navigation";
-import { signupUser } from "@/app/services/auth";
+import Link from "next/link";
+import { loginUser } from "@/app/services/auth";
 import { useAuth } from "@/app/context/AuthContext";
 
-const USER_ROLE = {
-    customer: "CUSTOMER",
-    client: "CLIENT",
-    admin: "ADMIN"
-};
-
-const USER_STATUS = {
-    approved: "APPROVED",
-    pending: "PENDING",
-    rejected: "REJECTED"
-};
-
-export default function SignupPage() {
+export default function SigninPage() {
     const router = useRouter();
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        name: "",
         email: "",
         password: "",
-        confirmPassword: "",
-        userRole: USER_ROLE.customer,
     });
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [apiError, setApiError] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error when user types
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: "" }));
         }
@@ -47,9 +32,6 @@ export default function SignupPage() {
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
-
-        // Name validation
-        if (!formData.name.trim()) newErrors.name = "Name is required";
 
         // Email validation
         const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -62,13 +44,6 @@ export default function SignupPage() {
         // Password validation
         if (!formData.password) {
             newErrors.password = "Password is required";
-        } else if (formData.password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
-        }
-
-        // Confirm Password validation
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = "Passwords do not match";
         }
 
         setErrors(newErrors);
@@ -82,29 +57,27 @@ export default function SignupPage() {
         if (validate()) {
             setIsLoading(true);
             try {
-                const data = await signupUser({
-                    name: formData.name,
+                const data = await loginUser({
                     email: formData.email,
                     password: formData.password,
-                    userRole: formData.userRole,
-                    userStatus: USER_STATUS.approved
                 });
 
-                console.log("Signup successful:", data);
+                console.log("Login successful:", data);
 
-                // Redirect to Login page on success
-                router.push(ROUTES.LOGIN);
+                // Update global auth state
+                login(data);
+
+                // Redirect to Home page on success
+                router.push(ROUTES.HOME);
 
             } catch (error: any) {
-                console.error("Signup error:", error);
-                setApiError(error.message || "Failed to connect to the server");
+                console.error("Login error:", error);
+                setApiError(error.message || "Invalid email or password");
             } finally {
                 setIsLoading(false);
             }
         }
     };
-    // ... rest of the component
-
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
@@ -124,10 +97,10 @@ export default function SignupPage() {
                     </div>
 
                     <h2 className="text-3xl font-bold text-slate-900 tracking-tight text-center">
-                        Create your account
+                        Welcome back
                     </h2>
                     <p className="mt-2 text-slate-500 text-center text-sm">
-                        Join thousands of movie lovers and get exclusive access.
+                        Please enter your details to sign in.
                     </p>
                 </motion.div>
 
@@ -143,20 +116,6 @@ export default function SignupPage() {
                                 {apiError}
                             </div>
                         )}
-
-                        <div className="relative">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                placeholder="Full Name"
-                                disabled={isLoading}
-                                className={`w-full bg-slate-50 border ${errors.name ? 'border-red-500' : 'border-slate-200'} rounded-xl px-12 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
-                            />
-                            {errors.name && <p className="text-red-500 text-xs mt-1 ml-1">{errors.name}</p>}
-                        </div>
 
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -186,38 +145,6 @@ export default function SignupPage() {
                             {errors.password && <p className="text-red-500 text-xs mt-1 ml-1">{errors.password}</p>}
                         </div>
 
-                        <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                placeholder="Confirm Password"
-                                disabled={isLoading}
-                                className={`w-full bg-slate-50 border ${errors.confirmPassword ? 'border-red-500' : 'border-slate-200'} rounded-xl px-12 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
-                            />
-                            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 ml-1">{errors.confirmPassword}</p>}
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 flex items-center justify-center pointer-events-none">
-                                <ChevronDown className="w-5 h-5" />
-                            </div>
-                            <select
-                                name="userRole"
-                                value={formData.userRole}
-                                onChange={handleChange}
-                                disabled={isLoading}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-12 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <option value={USER_ROLE.admin}>Admin</option>
-                                <option value={USER_ROLE.client}>Client</option>
-                                <option value={USER_ROLE.customer}>Customer</option>
-
-                            </select>
-                        </div>
-
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -226,16 +153,23 @@ export default function SignupPage() {
                             {isLoading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Creating Account...
+                                    Signing In...
                                 </>
                             ) : (
                                 <>
-                                    Sign Up
+                                    Sign In
                                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
                         </button>
                     </form>
+
+                    <p className="text-center text-sm text-slate-500">
+                        Don't have an account?{" "}
+                        <a href={ROUTES.SIGNUP} className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">
+                            Sign up
+                        </a>
+                    </p>
                 </motion.div>
             </div>
         </div>
