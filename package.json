@@ -5,7 +5,7 @@
   "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "framer-motion": "^12.31.0",
+    "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
