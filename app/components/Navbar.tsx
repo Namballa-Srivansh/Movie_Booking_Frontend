@@ -37,9 +37,10 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
+                <div className="hidden md:flex items-center gap-8 text-xl font-medium text-slate-700">
                     <a href="#" className="hover:text-indigo-600 transition-colors">Movies</a>
                     <a href="#" className="hover:text-indigo-600 transition-colors">Theaters</a>
+                    <a href="#" className="hover:text-indigo-600 transition-colors">Bookings</a>
                 </div>
 
                 {/* Actions */}
@@ -56,13 +57,13 @@ export default function Navbar() {
                             >
                                 Logout
                             </button>
-                            <button className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5">
+                            <Link href={ROUTES.PROFILE} className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 block">
                                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                                     <span className="text-indigo-600 font-bold text-lg">
-                                        {user?.email?.charAt(0).toUpperCase() || "U"}
+                                        {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                                     </span>
                                 </div>
-                            </button>
+                            </Link>
                         </div>
                     ) : (
                         <>
