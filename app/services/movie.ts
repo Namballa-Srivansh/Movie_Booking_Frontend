@@ -1,0 +1,34 @@
+export const createMovie = async (movieData: any, token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token
+        },
+        body: JSON.stringify(movieData),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.err || errorData.message || `Failed to create movie: ${response.status}`;
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+};
+
+export const getAllMovies = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch movies: ${response.status}`);
+    }
+
+    return await response.json();
+};

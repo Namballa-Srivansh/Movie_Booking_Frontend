@@ -3,12 +3,18 @@
 import { Search, Menu, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ROUTES } from "@/app/routes";
 import { useAuth } from "@/app/context/AuthContext";
+import { PlusCircle } from "lucide-react";
 
 export default function Navbar() {
     const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
+
+    const userRole = (user?.userRole || user?.role || "").toLowerCase();
+    const canCreateMovie = userRole === "owner" || userRole === "admin";
 
     useEffect(() => {
         const handleScroll = () => {
@@ -26,7 +32,7 @@ export default function Navbar() {
                 }`}
         >
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                {/* Logo */}
+
                 <Link href={ROUTES.HOME} className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center">
                         <span className="text-white font-bold text-xl">M</span>
@@ -36,14 +42,26 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8 text-xl font-medium text-slate-700">
-                    <a href="#" className="hover:text-indigo-600 transition-colors">Movies</a>
+                    {pathname === ROUTES.MOVIES ? (
+                        <Link href={ROUTES.HOME} className="hover:text-indigo-600 transition-colors">Home</Link>
+                    ) : (
+                        <Link href={ROUTES.MOVIES} className="hover:text-indigo-600 transition-colors">Movies</Link>
+                    )}
                     <a href="#" className="hover:text-indigo-600 transition-colors">Theaters</a>
                     <a href="#" className="hover:text-indigo-600 transition-colors">Bookings</a>
+
+                    {isAuthenticated && canCreateMovie && (
+                        <Link
+                            href={ROUTES.CREATE_MOVIE}
+                            className="flex items-center gap-1.5 text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
+                        >
+                            <PlusCircle className="w-5 h-5" />
+                            <span>Create Movie</span>
+                        </Link>
+                    )}
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-4">
                     <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors rounded-full hover:bg-slate-100">
                         <Search className="w-5 h-5" />
@@ -60,7 +78,7 @@ export default function Navbar() {
                             <Link href={ROUTES.PROFILE} className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 block">
                                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                                     <span className="text-indigo-600 font-bold text-lg">
-                                        {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                                        {user?.name?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                                     </span>
                                 </div>
                             </Link>
@@ -85,4 +103,3 @@ export default function Navbar() {
         </nav>
     );
 }
-

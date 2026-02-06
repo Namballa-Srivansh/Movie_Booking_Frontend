@@ -3,4 +3,6 @@ export const ROUTES = {
     SIGNUP: '/signup',
     LOGIN: '/login',
     PROFILE: '/profile',
+    CREATE_MOVIE: '/movies/create',
+    MOVIES: '/movies',
 };
