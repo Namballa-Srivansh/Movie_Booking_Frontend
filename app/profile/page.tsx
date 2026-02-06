@@ -64,49 +64,41 @@ export default function ProfilePage() {
         setUpdateLoading(true);
         setUpdateError("");
         try {
-            // Robust ID and Token extraction
             const userId = user?.id || user?._id || user?.userId;
             const token = user?.token || user?.accessToken;
 
             if (userId && token) {
                 const payload = {
                     name: formData.name,
-                    // email: formData.email, // keeping email in payload if you decide to enable it on backend later
                 };
 
-                // Filter out undefined/empty
                 const cleanPayload = Object.fromEntries(
                     Object.entries(payload).filter(([_, v]) => v != null && v !== "")
                 );
 
                 await updateUser(userId, token, cleanPayload);
 
-                // Optimistic Update / Immediate Feedback
                 const updatedUserLocal = {
                     ...profileData?.data, // prefer existing profile data structure
                     ...userData,
                     name: formData.name,
                 };
 
-                // Update local profile data immediately
+ 
                 setProfileData({ ...profileData, data: updatedUserLocal });
 
-                // Close modal and stop loading to unblock UI
                 setIsEditModalOpen(false);
                 setUpdateLoading(false);
                 alert("Profile Updated Successfully!");
 
-                // Refetch in background to ensure consistency
                 try {
                     const data = await getUserById(userId, token);
                     setProfileData(data);
-                    // Update form data to match fresh data
                     setFormData({
                         name: data.data?.name || data.name || data.data?.username || data.username || "",
                         email: data.data?.email || data.email || ""
                     });
                 } catch (fetchErr) {
-                    // Fail silently on background fetch
                     console.error("Background refetch failed:", fetchErr);
                 }
             } else {
@@ -301,18 +293,18 @@ export default function ProfilePage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+                                    className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={updateLoading}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm hover:shadow transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {updateLoading ? (
                                         <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                             Saving...
                                         </>
                                     ) : (
