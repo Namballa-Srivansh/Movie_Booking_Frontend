@@ -9,15 +9,15 @@ import { signupUser } from "@/app/services/auth";
 import { useAuth } from "@/app/context/AuthContext";
 
 const USER_ROLE = {
-    customer: "CUSTOMER",
-    client: "CLIENT",
-    admin: "ADMIN"
+    customer: "customer",
+    owner: "owner",
+    admin: "admin"
 };
 
 const USER_STATUS = {
-    approved: "APPROVED",
-    pending: "PENDING",
-    rejected: "REJECTED"
+    approved: "approved",
+    pending: "pending",
+    rejected: "rejected"
 };
 
 export default function SignupPage() {
@@ -211,8 +211,8 @@ export default function SignupPage() {
                                 disabled={isLoading}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-12 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <option value={USER_ROLE.admin}>Admin</option>
-                                <option value={USER_ROLE.client}>Client</option>
+
+                                <option value={USER_ROLE.owner}>Owner</option>
                                 <option value={USER_ROLE.customer}>Customer</option>
 
                             </select>

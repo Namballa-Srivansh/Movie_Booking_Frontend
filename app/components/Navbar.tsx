@@ -60,7 +60,7 @@ export default function Navbar() {
                             <Link href={ROUTES.PROFILE} className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 block">
                                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                                     <span className="text-indigo-600 font-bold text-lg">
-                                        {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                                        {user?.name?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                                     </span>
                                 </div>
                             </Link>
