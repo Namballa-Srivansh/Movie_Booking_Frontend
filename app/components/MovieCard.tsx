@@ -1,7 +1,9 @@
 "use client";
 
-import { Star, Calendar, MapPin, PlayCircle } from "lucide-react";
+import { Star, Calendar, MapPin, PlayCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { ROUTES } from "@/app/routes";
 
 type Movie = {
     id: number;
@@ -14,6 +16,7 @@ type Movie = {
     director: string;
     releaseStatus: string;
     poster?: string;
+    _id?: string;
 };
 
 export default function MovieCard({ movie }: { movie: Movie }) {
@@ -23,7 +26,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-lg max-w-sm mx-auto w-full flex flex-col h-full"
         >
             {/* Poster / Image Area */}
-            <div className="relative h-[320px] bg-slate-200 overflow-hidden shrink-0">
+            <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`} className="relative h-[320px] bg-slate-200 overflow-hidden shrink-0 block">
                 {/* Placeholder Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300" />
 
@@ -46,23 +49,26 @@ export default function MovieCard({ movie }: { movie: Movie }) {
 
                 {/* Hover Content - Watch Trailer */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <a
-                        href={movie.trailerUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.open(movie.trailerUrl, '_blank');
+                        }}
                         className="flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white font-bold hover:bg-white/30 transition-all transform scale-90 group-hover:scale-100"
                     >
                         <PlayCircle className="w-5 h-5 fill-current" />
                         Watch Trailer
-                    </a>
+                    </button>
                 </div>
-            </div>
+            </Link>
 
             {/* Info Area */}
             <div className="p-5 flex flex-col grow">
-                <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                    {movie.name}
-                </h3>
+                <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`}>
+                    <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                        {movie.name}
+                    </h3>
+                </Link>
 
                 <div className="flex items-center gap-2 text-slate-500 text-xs mb-3 font-medium">
                     <Calendar className="w-3.5 h-3.5" />
@@ -78,14 +84,14 @@ export default function MovieCard({ movie }: { movie: Movie }) {
                 <div className="pt-4 border-t border-slate-100">
                     <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Cast</p>
                     <div className="flex flex-wrap gap-1.5">
-                        {movie.casts.slice(0, 3).map((cast, i) => (
+                        {(movie.casts || []).slice(0, 3).map((cast, i) => (
                             <span key={i} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md">
                                 {cast}
                             </span>
                         ))}
-                        {movie.casts.length > 3 && (
+                        {(movie.casts || []).length > 3 && (
                             <span className="px-2 py-1 bg-slate-50 text-slate-400 text-xs rounded-md">
-                                +{movie.casts.length - 3}
+                                +{(movie.casts || []).length - 3}
                             </span>
                         )}
                     </div>

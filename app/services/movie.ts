@@ -32,3 +32,19 @@ export const getAllMovies = async () => {
 
     return await response.json();
 };
+
+export const getMovieById = async (id: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch movie: ${response.status}`);
+    }
+
+    return await response.json();
+};
