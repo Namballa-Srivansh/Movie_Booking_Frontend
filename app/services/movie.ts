@@ -33,6 +33,24 @@ export const getAllMovies = async () => {
     return await response.json();
 };
 
+export const updateMovie = async (id: string, movieData: any, token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+        },
+        body: JSON.stringify(movieData),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to update movie: ${response.status}`);
+    }
+
+    return await response.json();
+};
+
 export const getMovieById = async (id: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies/${id}`, {
         method: "GET",

@@ -12,6 +12,7 @@ import { ROUTES } from "@/app/routes";
 
 interface Movie {
     _id: string;
+    id?: string;
     name: string;
     description: string;
     casts: string[];
@@ -113,7 +114,7 @@ export default function MovieDetailsPage() {
 
                         {isOwner && (
                             <button
-                                onClick={() => {/* TODO: Navigate to edit page */ }}
+                                onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie._id || movie.id}/edit`)}
                                 className="mt-4 flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-amber-500/20"
                             >
                                 <Edit className="w-4 h-4" />
