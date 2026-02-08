@@ -66,3 +66,20 @@ export const getMovieById = async (id: string) => {
 
     return await response.json();
 };
+
+export const deleteMovie = async (id: string, token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to delete movie: ${response.status}`);
+    }
+
+    return await response.json();
+};

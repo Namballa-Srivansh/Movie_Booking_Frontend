@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getMovieById } from "@/app/services/movie";
+import { getMovieById, deleteMovie } from "@/app/services/movie";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
-import { Loader2, Calendar, Clock, Globe, User, Play, Edit } from "lucide-react";
+import { Loader2, Calendar, Clock, Globe, User, Play, Edit, Trash } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
@@ -51,6 +51,24 @@ export default function MovieDetailsPage() {
 
         fetchMovie();
     }, [params.id]);
+
+    const handleDelete = async () => {
+        if (!movie) return;
+
+        if (confirm("Are you sure you want to delete this movie? This action cannot be undone.")) {
+            try {
+                setIsLoading(true);
+                const token = user?.token || user?.accessToken || "";
+                await deleteMovie(movie._id || movie.id || "", token);
+                // Force a hard refresh/revalidation if needed, or just redirect
+                router.push(ROUTES.MOVIES);
+                router.refresh();
+            } catch (err: any) {
+                setError(err.message || "Failed to delete movie");
+                setIsLoading(false);
+            }
+        }
+    };
 
     const userRole = (user?.userRole || user?.role || "").toLowerCase();
     const isOwner = user && movie && (userRole === "owner" || userRole === "admin") && (user.id === (movie.owner || movie.userId));
@@ -113,13 +131,22 @@ export default function MovieDetailsPage() {
                         </h1>
 
                         {isOwner && (
-                            <button
-                                onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie._id || movie.id}/edit`)}
-                                className="mt-4 flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-amber-500/20"
-                            >
-                                <Edit className="w-4 h-4" />
-                                Edit Movie
-                            </button>
+                            <div className="mt-4 flex flex-wrap gap-3">
+                                <button
+                                    onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie._id || movie.id}/edit`)}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-amber-500/20"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                    Edit Movie
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-red-600/20"
+                                >
+                                    <Trash className="w-4 h-4" />
+                                    Delete Movie
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
