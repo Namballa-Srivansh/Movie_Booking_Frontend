@@ -52,7 +52,11 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     ) : (
                         <Link href={ROUTES.MOVIES} className={textColor}>Movies</Link>
                     )}
-                    <a href="#" className={textColor}>Theaters</a>
+                    {pathname === ROUTES.THEATRES ? (
+                        <Link href={ROUTES.HOME} className={textColor}>Home</Link>
+                    ) : (
+                        <Link href={ROUTES.THEATRES} className={textColor}>Theaters</Link>
+                    )}
                     <a href="#" className={textColor}>Bookings</a>
 
                     {isAuthenticated && canCreateMovie && (

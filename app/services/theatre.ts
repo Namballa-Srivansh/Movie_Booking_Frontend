@@ -15,3 +15,19 @@ export const createTheatre = async (theatreData: any, token: string) => {
 
     return await response.json();
 };
+
+export const getAllTheatres = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/theatres`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch theatres: ${response.status}`);
+    }
+
+    return await response.json();
+};
