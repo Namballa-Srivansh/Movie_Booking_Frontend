@@ -9,4 +9,7 @@ export const ROUTES = {
     MOVIES: '/movies',
     MOVIE_DETAILS: '/movie',
     EDIT_MOVIE: "/movie", // Usage: /movie/[id]/edit
+    SHOWS: '/shows',
+    CREATE_SHOW: '/shows/create',
+    BOOK_SHOW: '/book-show',
 };
