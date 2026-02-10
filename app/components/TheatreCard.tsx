@@ -35,9 +35,11 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
                 </div>
             </div>
             <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                    {theatre.name}
-                </h3>
+                <Link href={`/theatres/${theatre._id || theatre.id}`}>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1 cursor-pointer">
+                        {theatre.name}
+                    </h3>
+                </Link>
                 {theatre.description && (
                     <p className="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
                         {theatre.description}
@@ -51,7 +53,7 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
                         <div className="flex flex-wrap gap-2">
                             {theatre.movies.map((movie) => (
                                 <Link
-                                    href={`/movies/${movie._id}`}
+                                    href={`/movie/${movie._id}`}
                                     key={movie._id}
                                     className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 hover:bg-indigo-100 transition-colors"
                                 >
