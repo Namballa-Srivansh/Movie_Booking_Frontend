@@ -57,6 +57,11 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     ) : (
                         <Link href={ROUTES.THEATRES} className={textColor}>Theaters</Link>
                     )}
+                    {pathname === ROUTES.SHOWS ? (
+                        <Link href={ROUTES.HOME} className={textColor}>Home</Link>
+                    ) : (
+                        <Link href={ROUTES.SHOWS} className={textColor}>Shows</Link>
+                    )}
                     <a href="#" className={textColor}>Bookings</a>
 
                     {isAuthenticated && canCreateMovie && (
@@ -77,6 +82,15 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                                 >
                                     <PlusCircle className="w-5 h-5" />
                                     <span>Create Theatre</span>
+                                </Link>
+                            )}
+                            {pathname.startsWith(ROUTES.SHOWS) && pathname !== ROUTES.CREATE_SHOW && (
+                                <Link
+                                    href={ROUTES.CREATE_SHOW}
+                                    className={`flex items-center gap-1.5 font-semibold transition-colors ${isTransparent ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-700"}`}
+                                >
+                                    <PlusCircle className="w-5 h-5" />
+                                    <span>Create Show</span>
                                 </Link>
                             )}
                         </div>
