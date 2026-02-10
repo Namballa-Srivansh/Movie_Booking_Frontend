@@ -61,14 +61,16 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
 
                     {isAuthenticated && canCreateMovie && (
                         <div className="flex items-center gap-4">
-                            <Link
-                                href={ROUTES.CREATE_MOVIE}
-                                className={`flex items-center gap-1.5 font-semibold transition-colors ${isTransparent ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-700"}`}
-                            >
-                                <PlusCircle className="w-5 h-5" />
-                                <span>Create Movie</span>
-                            </Link>
-                            {pathname !== ROUTES.CREATE_THEATRE && (
+                            {(pathname.startsWith(ROUTES.MOVIES) || pathname.startsWith("/movie")) && (
+                                <Link
+                                    href={ROUTES.CREATE_MOVIE}
+                                    className={`flex items-center gap-1.5 font-semibold transition-colors ${isTransparent ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-700"}`}
+                                >
+                                    <PlusCircle className="w-5 h-5" />
+                                    <span>Create Movie</span>
+                                </Link>
+                            )}
+                            {pathname.startsWith(ROUTES.THEATRES) && pathname !== ROUTES.CREATE_THEATRE && (
                                 <Link
                                     href={ROUTES.CREATE_THEATRE}
                                     className={`flex items-center gap-1.5 font-semibold transition-colors ${isTransparent ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-700"}`}
