@@ -17,8 +17,13 @@ export const createMovie = async (movieData: any, token: string) => {
     return await response.json();
 };
 
-export const getAllMovies = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies`, {
+export const getAllMovies = async (page?: number, limit?: number) => {
+    let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/movies`;
+    if (page && limit) {
+        url += `?page=${page}&limit=${limit}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
