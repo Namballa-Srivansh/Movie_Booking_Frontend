@@ -1,5 +1,9 @@
-import { Building2, Film, MapPin } from "lucide-react";
+import { Building2, Film, MapPin, Loader2 } from "lucide-react";
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { getAllShows } from "@/app/services/show";
+import { ROUTES } from "@/app/routes";
 
 interface Movie {
     _id: string;
@@ -22,6 +26,44 @@ interface TheatreCardProps {
 }
 
 const TheatreCard = ({ theatre }: TheatreCardProps) => {
+    const router = useRouter();
+    const [loadingMovieId, setLoadingMovieId] = useState<string | null>(null);
+
+    const handleMovieClick = async (e: React.MouseEvent, movieId: string) => {
+        e.preventDefault(); // Prevent default Link behavior if we keep it as a Link, or just use button/div
+        setLoadingMovieId(movieId);
+
+        try {
+            const response = await getAllShows();
+            const shows = response.data || response; // Adjust based on API response structure
+
+            // Find a show for this theatre and movie
+            const theatreId = theatre._id || theatre.id;
+
+            // Filter shows that match both theatre and movie
+            // Note: show.theatreId and show.movieId might be populated objects or just IDs depending on backend
+            const matchingShow = shows.find((show: any) => {
+                const showTheatreId = typeof show.theatreId === 'object' ? show.theatreId._id : show.theatreId;
+                const showMovieId = typeof show.movieId === 'object' ? show.movieId._id : show.movieId;
+
+                return showTheatreId === theatreId && showMovieId === movieId;
+            });
+
+            if (matchingShow) {
+                router.push(`${ROUTES.BOOK_SHOW}/${matchingShow._id}`);
+            } else {
+                // Fallback to movie details if no specific show is found
+                router.push(`/movie/${movieId}`);
+            }
+        } catch (error) {
+            console.error("Failed to find show:", error);
+            // Fallback on error
+            router.push(`/movie/${movieId}`);
+        } finally {
+            setLoadingMovieId(null);
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
             <div className="h-32 bg-gradient-to-r from-slate-100 to-slate-200 relative">
@@ -52,13 +94,15 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Movies Running</p>
                         <div className="flex flex-wrap gap-2">
                             {theatre.movies.map((movie) => (
-                                <Link
-                                    href={`/movie/${movie._id}`}
+                                <button
                                     key={movie._id}
-                                    className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 hover:bg-indigo-100 transition-colors"
+                                    onClick={(e) => handleMovieClick(e, movie._id)}
+                                    disabled={loadingMovieId === movie._id}
+                                    className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center gap-1"
                                 >
+                                    {loadingMovieId === movie._id && <Loader2 className="w-3 h-3 animate-spin" />}
                                     {movie.name}
-                                </Link>
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -74,10 +118,10 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
                     </div>
                 </div>
 
-                <button className="w-full mt-6 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl transition-colors border border-slate-200 text-sm flex items-center justify-center gap-2">
+                <Link href={`/theatres/${theatre._id || theatre.id}`} className="w-full mt-6 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl transition-colors border border-slate-200 text-sm flex items-center justify-center gap-2">
                     <Film className="w-4 h-4" />
                     View Shows
-                </button>
+                </Link>
             </div>
         </div>
     );
