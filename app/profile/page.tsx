@@ -25,16 +25,19 @@ export default function ProfilePage() {
         }
 
         const fetchUserProfile = async () => {
-            const userId = user?.id || user?._id || user?.userId;
-            const token = user?.token || user?.accessToken;
+            const effectiveUser = user?.user || user;
+            const userId = effectiveUser?.id || effectiveUser?._id || effectiveUser?.userId;
+            const token = user?.token || user?.accessToken || effectiveUser?.token || effectiveUser?.accessToken;
 
             if (userId && token) {
                 try {
                     const data = await getUserById(userId, token);
                     setProfileData(data);
+                    // rigorous check for where the user data is
+                    const actualUser = data.user || data.data || data;
                     setFormData({
-                        name: data.data?.name || data.name || data.data?.username || data.username || "",
-                        email: data.data?.email || data.email || ""
+                        name: actualUser?.name || actualUser?.username || "",
+                        email: actualUser?.email || ""
                     });
                 } catch (err: any) {
                     setError("Failed to load profile data.");
@@ -64,8 +67,9 @@ export default function ProfilePage() {
         setUpdateLoading(true);
         setUpdateError("");
         try {
-            const userId = user?.id || user?._id || user?.userId;
-            const token = user?.token || user?.accessToken;
+            const effectiveUser = user?.user || user;
+            const userId = effectiveUser?.id || effectiveUser?._id || effectiveUser?.userId;
+            const token = user?.token || user?.accessToken || effectiveUser?.token || effectiveUser?.accessToken;
 
             if (userId && token) {
                 const payload = {
@@ -79,12 +83,12 @@ export default function ProfilePage() {
                 await updateUser(userId, token, cleanPayload);
 
                 const updatedUserLocal = {
-                    ...profileData?.data, // prefer existing profile data structure
+                    ...profileData?.data,
                     ...userData,
                     name: formData.name,
                 };
 
- 
+
                 setProfileData({ ...profileData, data: updatedUserLocal });
 
                 setIsEditModalOpen(false);
@@ -94,9 +98,10 @@ export default function ProfilePage() {
                 try {
                     const data = await getUserById(userId, token);
                     setProfileData(data);
+                    const actualUser = data.user || data.data || data;
                     setFormData({
-                        name: data.data?.name || data.name || data.data?.username || data.username || "",
-                        email: data.data?.email || data.email || ""
+                        name: actualUser?.name || actualUser?.username || "",
+                        email: actualUser?.email || ""
                     });
                 } catch (fetchErr) {
                     console.error("Background refetch failed:", fetchErr);
@@ -128,14 +133,13 @@ export default function ProfilePage() {
         )
     }
 
-    const userData = profileData?.data || profileData || user;
+    const tempUser = profileData?.user || profileData?.data || profileData || user;
+    const userData = tempUser?.user || tempUser;
 
-    // Derived properties with fallbacks
     const derivedName = userData?.name || userData?.username || "User";
     const derivedRole = userData?.userRole || userData?.role || "customer";
     const derivedStatus = userData?.userStatus || userData?.status || "approved";
 
-    // Helper to get consistent date format
     const formattedDate = new Date(userData?.createdAt || Date.now()).toLocaleDateString(undefined, {
         weekday: 'short',
         year: 'numeric',
@@ -214,7 +218,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Quick Actions */}
+                    {/* Right Column:*/}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8 h-full">
                             <h2 className="text-xl font-bold text-blue-700 mb-6 border-b border-slate-100 pb-4">

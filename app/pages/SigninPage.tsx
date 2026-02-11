@@ -6,7 +6,7 @@ import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { ROUTES } from "@/app/routes";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { loginUser } from "@/app/services/auth";
+import { loginUser, verifyUser } from "@/app/services/auth";
 import { useAuth } from "@/app/context/AuthContext";
 
 export default function SigninPage() {
@@ -64,10 +64,24 @@ export default function SigninPage() {
 
                 console.log("Login successful:", data);
 
-                // Update global auth state
-                login(data);
+                let userDataToSet = data;
+                try {
+                    const verifiedUser = await verifyUser(data);
+                    const userFromBackend = verifiedUser?.data || verifiedUser;
 
-                // Redirect to Home page on success
+                    if (userFromBackend) {
+                        const initialToken = data.token || data.accessToken || data.data?.token || data.data?.accessToken;
+                        if (!userFromBackend.token && !userFromBackend.accessToken && initialToken) {
+                            userFromBackend.token = initialToken;
+                        }
+                        userDataToSet = userFromBackend;
+                    }
+                } catch (verifyErr) {
+                    console.warn("Failed to fetch full user details, proceeding with login response:", verifyErr);
+                }
+
+                login(userDataToSet);
+
                 router.push(ROUTES.HOME);
 
             } catch (error: any) {
