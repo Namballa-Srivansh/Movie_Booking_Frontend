@@ -5,7 +5,7 @@ import { getAllTheatres } from "@/app/services/theatre";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import TheatreCard from "@/app/components/TheatreCard";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Theatre {
     _id: string;
@@ -22,13 +22,28 @@ export default function TheatresPage() {
     const [theatres, setTheatres] = useState<Theatre[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const PAGE_SIZE = 8; // Adjust page size as needed
 
     useEffect(() => {
         const fetchTheatres = async () => {
+            setIsLoading(true);
             try {
-                const response = await getAllTheatres();
+                const response = await getAllTheatres(currentPage, PAGE_SIZE);
                 // Handle different response structures gracefully
-                const theatresData = Array.isArray(response) ? response : (response.data || response.theatres || []);
+                let theatresData = [];
+                if (response.data && response.data.theatres) {
+                    theatresData = response.data.theatres;
+                    setTotalPages(response.data.totalPages || 0);
+                } else if (response.theatres) {
+                    theatresData = response.theatres;
+                    setTotalPages(response.totalPages || 0);
+                } else {
+                    // Fallback for legacy response
+                    theatresData = Array.isArray(response) ? response : (response.data || []);
+                }
+
                 setTheatres(theatresData);
             } catch (err: any) {
                 console.error("Failed to fetch theatres:", err);
@@ -39,7 +54,14 @@ export default function TheatresPage() {
         };
 
         fetchTheatres();
-    }, []);
+    }, [currentPage]);
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     if (isLoading) {
         return (
@@ -75,11 +97,39 @@ export default function TheatresPage() {
                         <p className="text-slate-400 text-sm mt-1">Be the first to create one!</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {theatres.map((theatre) => (
-                            <TheatreCard key={theatre._id || theatre.id} theatre={theatre} />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                            {theatres.map((theatre) => (
+                                <TheatreCard key={theatre._id || theatre.id} theatre={theatre} />
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-4">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+
+                                <span className="text-slate-600 font-medium">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    aria-label="Next page"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 

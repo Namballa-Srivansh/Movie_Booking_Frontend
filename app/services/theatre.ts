@@ -16,8 +16,13 @@ export const createTheatre = async (theatreData: any, token: string) => {
     return await response.json();
 };
 
-export const getAllTheatres = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/theatres`, {
+export const getAllTheatres = async (page?: number, limit?: number) => {
+    let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/theatres`;
+    if (page && limit) {
+        url += `?page=${page}&limit=${limit}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
