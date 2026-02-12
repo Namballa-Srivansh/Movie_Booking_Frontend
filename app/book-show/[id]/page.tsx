@@ -10,7 +10,7 @@ import { getShowById } from "@/app/services/show";
 import { createBooking } from "@/app/services/booking";
 
 export default function BookShowPage({ params }: { params: Promise<{ id: string }> }) {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
     const resolvedParams = use(params);
     const showId = resolvedParams.id;
@@ -50,7 +50,7 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
 
             // I'll leave userId out for now and rely on backend/token, or I'll need to update AuthContext to expose user ID.
 
-            await createBooking(bookingData, localStorage.getItem("token") || "");
+            await createBooking(bookingData, user?.token || "");
 
             // Success
             alert("Booking successful!");
