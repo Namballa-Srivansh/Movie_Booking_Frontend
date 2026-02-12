@@ -62,7 +62,11 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     ) : (
                         <Link href={ROUTES.SHOWS} className={textColor}>Shows</Link>
                     )}
-                    <a href="#" className={textColor}>Bookings</a>
+                    {pathname === ROUTES.BOOKINGS ? (
+                        <Link href={ROUTES.HOME} className={textColor}>Home</Link>
+                    ) : (
+                        <Link href={ROUTES.BOOKINGS} className={textColor}>Bookings</Link>
+                    )}
 
                     {isAuthenticated && canCreateMovie && (
                         <div className="flex items-center gap-4">

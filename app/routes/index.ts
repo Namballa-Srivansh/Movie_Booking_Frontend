@@ -12,4 +12,5 @@ export const ROUTES = {
     SHOWS: '/shows',
     CREATE_SHOW: '/shows/create',
     BOOK_SHOW: '/book-show',
+    BOOKINGS: '/bookings',
 };
