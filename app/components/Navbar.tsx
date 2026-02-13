@@ -67,6 +67,14 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     ) : (
                         <Link href={ROUTES.BOOKINGS} className={textColor}>Bookings</Link>
                     )}
+                    {userRole === "admin" && (
+                        pathname === "/admin/bookings" ? (
+                            <Link href={ROUTES.HOME} className={textColor}>Home</Link>
+                        ) : (
+                            <Link href="/admin/bookings" className={textColor}>All Bookings</Link>
+                        )
+                    )}
+
 
                     {isAuthenticated && canCreateMovie && (
                         <div className="flex items-center gap-4">
