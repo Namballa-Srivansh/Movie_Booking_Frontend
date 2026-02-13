@@ -54,7 +54,7 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
 
             // Success
             alert("Booking successful!");
-            router.push(ROUTES.PROFILE); // Redirect to profile/bookings
+            router.push(ROUTES.BOOKINGS); // Redirect to bookings
         } catch (err: any) {
             setError(err.message || "Booking failed");
         } finally {
