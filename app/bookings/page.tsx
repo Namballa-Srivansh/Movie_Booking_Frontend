@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { ROUTES } from "@/app/routes";
 import { getBookings } from "@/app/services/booking";
+import { makePayment } from "@/app/services/payment";
 import Navbar from "@/app/components/Navbar";
-import { Loader2, Calendar, MapPin, Clock, Ticket } from "lucide-react";
+import { Loader2, Calendar, MapPin, Clock, Ticket, CreditCard, CheckCircle, XCircle } from "lucide-react";
 
 export default function BookingsPage() {
     const { isAuthenticated, isLoading, user } = useAuth();
@@ -14,30 +15,50 @@ export default function BookingsPage() {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loadingBookings, setLoadingBookings] = useState(true);
     const [error, setError] = useState("");
+    const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
+
+    const fetchBookings = async () => {
+        if (user?.token) {
+            try {
+                const data = await getBookings(user.token);
+                setBookings(data.data || []);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to fetch bookings");
+            } finally {
+                setLoadingBookings(false);
+            }
+        }
+    };
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push(ROUTES.LOGIN);
         }
 
-        const fetchBookings = async () => {
-            if (user?.token) {
-                try {
-                    const data = await getBookings(user.token);
-                    setBookings(data.data || []);
-                } catch (err) {
-                    console.error(err);
-                    setError("Failed to fetch bookings");
-                } finally {
-                    setLoadingBookings(false);
-                }
-            }
-        };
-
         if (isAuthenticated && user) {
             fetchBookings();
         }
     }, [isAuthenticated, isLoading, user, router]);
+
+    const handlePayment = async (bookingId: string, amount: number) => {
+        if (!user?.token) return;
+
+        setProcessingPaymentId(bookingId);
+        try {
+            await makePayment(amount, bookingId, user.token);
+            // Refresh bookings to reflect new status
+            await fetchBookings();
+            alert("Payment successful!");
+        } catch (err: any) {
+            console.error(err);
+            alert(`Payment failed: ${err.message}`);
+            // Refresh bookings anyway to check if status expired
+            await fetchBookings();
+        } finally {
+            setProcessingPaymentId(null);
+        }
+    };
 
     if (isLoading || loadingBookings) {
         return (
@@ -88,7 +109,8 @@ export default function BookingsPage() {
                                         </div>
                                     </div>
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${booking.status === 'successful' ? 'bg-green-100 text-green-700' :
-                                            booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                        booking.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                            booking.status === 'expired' ? 'bg-gray-100 text-gray-700' :
                                                 'bg-yellow-100 text-yellow-700'
                                         }`}>
                                         {booking.status.toUpperCase()}
@@ -128,6 +150,45 @@ export default function BookingsPage() {
                                         <span className="font-bold text-indigo-600">₹{booking.totalCost}</span>
                                     </div>
                                 </div>
+
+                                {booking.status === 'PROCESSING' && (
+                                    <div className="mt-6 pt-4 border-t border-slate-50">
+                                        <button
+                                            onClick={() => handlePayment(booking._id, booking.totalCost)}
+                                            disabled={processingPaymentId === booking._id}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                                        >
+                                            {processingPaymentId === booking._id ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CreditCard className="w-4 h-4" />
+                                                    Pay Now
+                                                </>
+                                            )}
+                                        </button>
+                                        <p className="text-xs text-center text-slate-400 mt-2">
+                                            Finish payment to confirm seats
+                                        </p>
+                                    </div>
+                                )}
+
+                                {booking.status === 'EXPIRED' && (
+                                    <div className="mt-6 pt-4 border-t border-slate-50 flex flex-col items-center justify-center text-red-500">
+                                        <XCircle className="w-8 h-8 mb-2" />
+                                        <span className="font-medium">Payment Expired</span>
+                                    </div>
+                                )}
+
+                                {booking.status === 'SUCCESSFUL' && (
+                                    <div className="mt-6 pt-4 border-t border-slate-50 flex flex-col items-center justify-center text-green-600">
+                                        <CheckCircle className="w-8 h-8 mb-2" />
+                                        <span className="font-medium">Payment Successful</span>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -136,3 +197,5 @@ export default function BookingsPage() {
         </div>
     );
 }
+
+
