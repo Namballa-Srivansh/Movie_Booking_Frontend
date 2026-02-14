@@ -6,6 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { getMovieById, updateMovie } from "@/app/services/movie";
 import { ROUTES } from "@/app/routes";
 import { Film, Calendar, User, Globe, PlayCircle, Info, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import ImageUpload from "@/app/components/ImageUpload";
 
 export default function EditMoviePage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -23,7 +24,8 @@ export default function EditMoviePage() {
         language: "",
         releaseDate: "",
         director: "",
-        releaseStatus: ""
+        releaseStatus: "",
+        poster: ""
     });
 
     useEffect(() => {
@@ -51,7 +53,8 @@ export default function EditMoviePage() {
                         language: movie.language || "",
                         releaseDate: movie.releaseDate ? new Date(movie.releaseDate).toISOString().split('T')[0] : "",
                         director: movie.director || "",
-                        releaseStatus: movie.releaseStatus || ""
+                        releaseStatus: movie.releaseStatus || "",
+                        poster: movie.poster || movie.posterUrl || ""
                     });
                 }
             } catch (err: any) {
@@ -97,7 +100,8 @@ export default function EditMoviePage() {
                 language: formData.language,
                 releaseDate: formData.releaseDate,
                 director: formData.director,
-                releaseStatus: formData.releaseStatus
+                releaseStatus: formData.releaseStatus,
+                poster: formData.poster || undefined
             };
 
             console.log("Sending Update Movie Payload:", JSON.stringify(payload, null, 2));
@@ -166,6 +170,15 @@ export default function EditMoviePage() {
                                     placeholder="e.g. Inception"
                                     required
                                     minLength={2}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <ImageUpload
+                                    label="Movie Poster"
+                                    value={formData.poster}
+                                    onUpload={(url) => setFormData(prev => ({ ...prev, poster: url }))}
+                                    onRemove={() => setFormData(prev => ({ ...prev, poster: "" }))}
                                 />
                             </div>
 

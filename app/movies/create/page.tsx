@@ -6,6 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { createMovie } from "@/app/services/movie";
 import { ROUTES } from "@/app/routes";
 import { Film, Calendar, User, Globe, PlayCircle, Info, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import ImageUpload from "@/app/components/ImageUpload";
 
 export default function CreateMoviePage() {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -16,12 +17,13 @@ export default function CreateMoviePage() {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        casts: "", 
+        casts: "",
         trailerUrl: "",
         language: "English",
         releaseDate: "",
         director: "",
-        releaseStatus: "Coming Soon"
+        releaseStatus: "Coming Soon",
+        poster: ""
     });
 
     useEffect(() => {
@@ -66,7 +68,8 @@ export default function CreateMoviePage() {
                 language: formData.language,
                 releaseDate: formData.releaseDate,
                 director: formData.director,
-                releaseStatus: formData.releaseStatus
+                releaseStatus: formData.releaseStatus,
+                poster: formData.poster || undefined
             };
 
             console.log("Sending Create Movie Payload:", JSON.stringify(payload, null, 2));
@@ -140,6 +143,15 @@ export default function CreateMoviePage() {
                                     placeholder="e.g. Inception"
                                     required
                                     minLength={2}
+                                />
+                            </div>
+
+                            <div className="space-y-2 md:col-span-2">
+                                <ImageUpload
+                                    label="Movie Poster"
+                                    value={formData.poster}
+                                    onUpload={(url) => setFormData(prev => ({ ...prev, poster: url }))}
+                                    onRemove={() => setFormData(prev => ({ ...prev, poster: "" }))}
                                 />
                             </div>
 
