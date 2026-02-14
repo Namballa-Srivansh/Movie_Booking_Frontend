@@ -16,8 +16,20 @@ export const createShow = async (showData: any, token: string) => {
     return await response.json();
 };
 
-export const getAllShows = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/shows`, {
+export const getAllShows = async (filters?: { movieId?: string; theatreId?: string }) => {
+    let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/shows`;
+
+    if (filters) {
+        const queryParams = new URLSearchParams();
+        if (filters.movieId) queryParams.append("movieId", filters.movieId);
+        if (filters.theatreId) queryParams.append("theatreId", filters.theatreId);
+        const queryString = queryParams.toString();
+        if (queryString) {
+            url += `?${queryString}`;
+        }
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

@@ -52,3 +52,21 @@ export const getAllBookingsAdmin = async (token: string) => {
 
     return await response.json();
 };
+
+export const getBookingById = async (id: string, token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mba/api/v1/bookings/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token
+        },
+        cache: 'no-store'
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch booking: ${response.status}`);
+    }
+
+    return await response.json();
+};

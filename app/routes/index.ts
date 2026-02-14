@@ -13,4 +13,6 @@ export const ROUTES = {
     CREATE_SHOW: '/shows/create',
     BOOK_SHOW: '/book-show',
     BOOKINGS: '/bookings',
+    PAYMENT: '/payment', // Usage: /payment/[bookingId]
+    ADMIN_BOOKINGS: '/admin/bookings',
 };
