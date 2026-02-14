@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getMovieById, deleteMovie } from "@/app/services/movie";
+import { getOptimizedImageUrl } from "@/app/utils/cloudinary";
+import { getAllShows } from "@/app/services/show";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { Loader2, Calendar, Clock, Globe, User, Play, Edit, Trash } from "lucide-react";
@@ -21,9 +23,10 @@ interface Movie {
     releaseDate: string;
     director: string;
     releaseStatus: string;
+    poster?: string;
     posterUrl?: string;
-    owner?: string; // Assuming the API returns an owner field
-    userId?: string; // Alternative check
+    owner?: string;
+    userId?: string;
 }
 
 export default function MovieDetailsPage() {
@@ -33,6 +36,7 @@ export default function MovieDetailsPage() {
     const [movie, setMovie] = useState<Movie | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
         const fetchMovie = async () => {
@@ -70,6 +74,28 @@ export default function MovieDetailsPage() {
         }
     };
 
+    const handleBookTickets = async () => {
+        try {
+            const movieId = movie?._id || movie?.id;
+            if (!movieId) return;
+
+            setIsLoading(true);
+            const response = await getAllShows({ movieId });
+            const shows = response.data || [];
+
+            if (shows.length > 0) {
+                router.push(`${ROUTES.SHOWS}?movieId=${movieId}`);
+            } else {
+                alert("No show available with this movie");
+            }
+        } catch (error) {
+            console.error("Error checking shows:", error);
+            alert("Failed to check show availability");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const userRole = (user?.userRole || user?.role || "").toLowerCase();
     const isOwner = user && movie && (userRole === "owner" || userRole === "admin") && (user.id === (movie.owner || movie.userId));
 
@@ -101,53 +127,108 @@ export default function MovieDetailsPage() {
             <Navbar transparent={true} />
 
             {/* Hero Section */}
-            <div className="relative h-[60vh] w-full overflow-hidden bg-slate-900">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent z-10" />
+            <div className="relative w-full overflow-hidden bg-slate-900">
+                {/* Movie Poster Background with visual enhancements */}
+                <div className="absolute inset-0 z-0 bg-slate-900 pointer-events-none">
+                    {/* Background Image */}
+                    <div className="absolute inset-0 w-full h-full">
+                        <img
+                            src={getOptimizedImageUrl(movie.poster || movie.posterUrl, 'background') || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"}
+                            alt="Background"
+                            className="w-full h-full object-cover object-top opacity-80"
+                        />
+                    </div>
 
-                {/* Movie Poster Background */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center opacity-50 transition-opacity duration-700"
-                    style={{
-                        backgroundImage: `url('${movie.posterUrl || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"}')`
-                    }}
-                />
+                    {/* Gradient Overlay (User Requested Style) */}
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            background: 'linear-gradient(90deg, rgb(15, 23, 42) 24.97%, rgb(15, 23, 42) 38.3%, rgba(15, 23, 42, 0.04) 97.47%, rgb(15, 23, 42) 100%)'
+                        }}
+                    />
+                </div>
 
-                <div className="absolute bottom-0 left-0 right-0 z-20 container mx-auto px-6 py-12">
-                    <div className="max-w-4xl">
-                        <div className="flex flex-wrap items-center gap-3 mb-4 text-sm font-medium text-indigo-400">
-                            <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full backdrop-blur-sm">
-                                {movie.releaseStatus}
-                            </span>
-                            <span className="flex items-center gap-1 text-slate-300">
-                                <Globe className="w-4 h-4" /> {movie.language}
-                            </span>
-                            <span className="flex items-center gap-1 text-slate-300">
-                                <Calendar className="w-4 h-4" /> {movie.releaseDate ? new Date(movie.releaseDate).toLocaleDateString() : 'N/A'}
-                            </span>
+                <div className="relative z-10 container mx-auto px-6 py-12 md:py-20">
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                        {/* Poster Card - Left Side */}
+                        <div className="shrink-0 w-54 md:w-62 rounded-xl overflow-hidden shadow-2xl border border-white/10 mx-auto md:mx-0">
+                            <img
+                                src={getOptimizedImageUrl(movie.poster || movie.posterUrl, 'poster') || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"}
+                                alt={movie.name}
+                                className="w-full h-auto object-cover"
+                            />
+                            <div className="bg-black text-white text-center py-2 text-xs font-medium uppercase tracking-wider">
+                                In cinemas
+                            </div>
                         </div>
 
-                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-                            {movie.name}
-                        </h1>
+                        {/* Movie Details - Right Side */}
+                        <div className="flex-1 text-white pt-2">
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
+                                {movie.name}
+                            </h1>
 
-                        {isOwner && (
-                            <div className="mt-4 flex flex-wrap gap-3">
-                                <button
-                                    onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie._id || movie.id}/edit`)}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-amber-500/20"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                    Edit Movie
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-red-600/20"
-                                >
-                                    <Trash className="w-4 h-4" />
-                                    Delete Movie
-                                </button>
+                            <div className="flex flex-wrap items-center gap-4 mb-6 text-sm font-medium text-slate-300">
+                                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-md text-white border border-white/10">
+                                    {movie.language}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    {/* Estimated duration for visual completeness if not available */}
+                                    2h 30m
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <Calendar className="w-4 h-4" />
+                                    {movie.releaseDate ? new Date(movie.releaseDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                                </span>
+                                <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs uppercase border border-indigo-500/30">
+                                    {movie.releaseStatus}
+                                </span>
                             </div>
-                        )}
+
+                            {/* Synopsis in Hero for quick context (optional, based on design) */}
+                            <p className="text-slate-300 text-lg leading-relaxed max-w-2xl mb-8 line-clamp-3">
+                                {movie.description}
+                            </p>
+
+                            <div className="flex flex-wrap gap-4">
+                                <button
+                                    onClick={handleBookTickets}
+                                    className="px-8 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-lg shadow-rose-600/30 transition-all transform hover:scale-105 active:scale-95"
+                                >
+                                    Book Tickets
+                                </button>
+
+                                {movie.trailerUrl && (
+                                    <button
+                                        onClick={() => window.open(movie.trailerUrl, '_blank')}
+                                        className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold rounded-lg border border-white/30 transition-all flex items-center gap-2"
+                                    >
+                                        <Play className="w-4 h-4 fill-current" />
+                                        Trailer
+                                    </button>
+                                )}
+                            </div>
+
+                            {isOwner && (
+                                <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-3">
+                                    <button
+                                        onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie._id || movie.id}/edit`)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-medium rounded-lg border border-amber-500/30 transition-colors"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        Edit Movie
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium rounded-lg border border-red-500/30 transition-colors"
+                                    >
+                                        <Trash className="w-4 h-4" />
+                                        Delete Movie
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,20 +279,52 @@ export default function MovieDetailsPage() {
                         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm sticky top-24">
                             <h3 className="text-xl font-bold text-slate-900 mb-4">Official Trailer</h3>
                             <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden relative group cursor-pointer">
-                                {/* Placeholder for trailer - in real app would use iframe or video player */}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all">
-                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-all">
-                                        <Play className="w-8 h-8 text-white fill-white ml-1" />
+                                {isPlaying && movie?.trailerUrl ? (
+                                    <iframe
+                                        src={(() => {
+                                            const url = movie.trailerUrl;
+                                            let videoId = "";
+
+                                            // Handle various YouTube URL formats
+                                            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^#&?]*)/);
+                                            if (match && match[1]) {
+                                                videoId = match[1];
+                                            }
+
+                                            // Fallback if regex fails but simple replacement might work (unlikely but safe)
+                                            if (!videoId) {
+                                                if (url.includes('embed/')) return url; // Already an embed URL
+                                                return url; // Return original if unknown format
+                                            }
+
+                                            return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+                                        })()}
+                                        title="Official Trailer"
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                    ></iframe>
+                                ) : (
+                                    <div onClick={() => setIsPlaying(true)} className="w-full h-full relative">
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all z-10">
+                                            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-all">
+                                                <Play className="w-8 h-8 text-white fill-white ml-1" />
+                                            </div>
+                                        </div>
+                                        <img
+                                            src={getOptimizedImageUrl(movie?.poster || movie?.posterUrl, 'background') || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2670&auto=format&fit=crop"}
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                            alt="Trailer thumbnail"
+                                        />
                                     </div>
-                                </div>
-                                <img
-                                    src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2670&auto=format&fit=crop"
-                                    className="w-full h-full object-cover"
-                                    alt="Trailer thumbnail"
-                                />
+                                )}
                             </div>
                             <div className="mt-6 space-y-4">
-                                <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all">
+                                <button
+                                    onClick={handleBookTickets}
+                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all"
+                                >
                                     Book Tickets
                                 </button>
                                 <p className="text-center text-xs text-slate-400">

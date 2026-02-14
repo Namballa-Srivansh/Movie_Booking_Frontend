@@ -47,7 +47,9 @@ export const verifyUser = async (userData: any) => {
     });
 
     if (!response.ok) {
-        throw new Error(`User verification failed with status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Verification Error Details:", errorData);
+        throw new Error(errorData.message || errorData.err || `User verification failed with status: ${response.status}`);
     }
 
     return await response.json();

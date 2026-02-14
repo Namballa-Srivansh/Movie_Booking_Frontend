@@ -8,6 +8,7 @@ import { getAllMovies } from "@/app/services/movie";
 import { ROUTES } from "@/app/routes";
 import Navbar from "@/app/components/Navbar";
 import { Loader2, Plus, Film } from "lucide-react";
+import ImageUpload from "@/app/components/ImageUpload";
 
 interface Movie {
     _id: string;
@@ -25,6 +26,7 @@ export default function CreateTheatrePage() {
         city: "",
         pincode: "",
         address: "",
+        image: ""
     });
 
     const [availableMovies, setAvailableMovies] = useState<Movie[]>([]);
@@ -82,7 +84,8 @@ export default function CreateTheatrePage() {
             // 1. Create the theatre
             const createdTheatreResponse = await createTheatre({
                 ...formData,
-                pincode: Number(formData.pincode)
+                pincode: Number(formData.pincode),
+                image: formData.image || undefined
             }, token);
 
             const createdTheatreId = createdTheatreResponse.data?._id || createdTheatreResponse._id;
@@ -137,6 +140,15 @@ export default function CreateTheatrePage() {
                                     placeholder="Enter theatre name"
                                 />
                                 <p className="text-xs text-slate-400 mt-1">Minimum 5 characters</p>
+                            </div>
+
+                            <div>
+                                <ImageUpload
+                                    label="Theatre Image"
+                                    value={formData.image}
+                                    onUpload={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                                    onRemove={() => setFormData(prev => ({ ...prev, image: "" }))}
+                                />
                             </div>
 
                             <div>

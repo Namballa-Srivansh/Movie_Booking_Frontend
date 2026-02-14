@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ROUTES } from "@/app/routes";
 import { useRouter } from "next/navigation";
 import { getAllShows } from "@/app/services/show";
+import { getOptimizedImageUrl } from "@/app/utils/cloudinary";
 
 type Movie = {
     id: number;
@@ -53,8 +54,16 @@ export default function MovieCard({ movie }: { movie: Movie }) {
         >
             {/* Poster / Image Area */}
             <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`} className="relative h-[320px] bg-slate-200 overflow-hidden shrink-0 block">
-                {/* Placeholder Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300" />
+                {/* Poster Image or Placeholder Gradient */}
+                {movie.poster ? (
+                    <img
+                        src={getOptimizedImageUrl(movie.poster, 'poster')}
+                        alt={movie.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300" />
+                )}
 
                 {/* Status Badge */}
                 <div className="absolute top-4 left-4 z-10">
@@ -124,10 +133,10 @@ export default function MovieCard({ movie }: { movie: Movie }) {
                 </div>
 
                 <button
-                    onClick={handleBookTickets}
+                    onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`)}
                     className="w-full mt-5 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-[0.98]"
                 >
-                    BOOK TICKETS
+                    VIEW MOVIE
                 </button>
             </div>
         </motion.div>
