@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { getAllShows, deleteShow } from "@/app/services/show";
 import { Loader2, Calendar } from "lucide-react";
@@ -11,6 +12,8 @@ import ShowCard from "@/app/components/ShowCard";
 
 export default function ShowsPage() {
     const { user, isAuthenticated } = useAuth();
+    const searchParams = useSearchParams();
+    const movieId = searchParams.get("movieId");
     const [shows, setShows] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -18,7 +21,8 @@ export default function ShowsPage() {
     useEffect(() => {
         const fetchShows = async () => {
             try {
-                const data = await getAllShows();
+                const filters = movieId ? { movieId } : undefined;
+                const data = await getAllShows(filters);
                 setShows(data.data || []); // Adjust based on API response structure
             } catch (err: any) {
                 setError(err.message || "Failed to load shows");
@@ -28,7 +32,7 @@ export default function ShowsPage() {
         };
 
         fetchShows();
-    }, []);
+    }, [movieId]);
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this show?")) return;

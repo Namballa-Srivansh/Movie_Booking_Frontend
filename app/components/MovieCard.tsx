@@ -4,6 +4,8 @@ import { Star, Calendar, MapPin, PlayCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
+import { useRouter } from "next/navigation";
+import { getAllShows } from "@/app/services/show";
 
 type Movie = {
     id: number;
@@ -20,6 +22,30 @@ type Movie = {
 };
 
 export default function MovieCard({ movie }: { movie: Movie }) {
+    const router = useRouter();
+
+    const handleBookTickets = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+            const movieId = (movie.id || movie._id)?.toString();
+            if (!movieId) return;
+
+            const response = await getAllShows({ movieId });
+            const shows = response.data || [];
+
+            if (shows.length > 0) {
+                router.push(`${ROUTES.SHOWS}?movieId=${movieId}`);
+            } else {
+                alert("No show available with this movie");
+            }
+        } catch (error) {
+            console.error("Error checking shows:", error);
+            alert("Failed to check show availability");
+        }
+    };
+
     return (
         <motion.div
             whileHover={{ y: -10 }}
@@ -97,7 +123,10 @@ export default function MovieCard({ movie }: { movie: Movie }) {
                     </div>
                 </div>
 
-                <button className="w-full mt-5 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-[0.98]">
+                <button
+                    onClick={handleBookTickets}
+                    className="w-full mt-5 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-[0.98]"
+                >
                     BOOK TICKETS
                 </button>
             </div>
