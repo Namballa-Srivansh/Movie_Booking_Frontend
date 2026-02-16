@@ -18,6 +18,7 @@ interface Theatre {
     city: string;
     pincode: number;
     address?: string;
+    image?: string;
     movies?: Movie[];
 }
 
@@ -66,10 +67,21 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
 
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
-            <div className="h-32 bg-gradient-to-r from-slate-100 to-slate-200 relative">
-                <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                    <Building2 className="w-16 h-16 text-slate-400" />
-                </div>
+            <div className="h-32 bg-slate-100 relative overflow-hidden">
+                {theatre.image ? (
+                    <img
+                        src={theatre.image}
+                        alt={theatre.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-r from-slate-100 to-slate-200">
+                        <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                            <Building2 className="w-16 h-16 text-slate-400" />
+                        </div>
+                    </div>
+                )}
+
                 <div className="absolute bottom-4 left-6">
                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-bold text-indigo-600 uppercase tracking-wide shadow-sm">
                         {theatre.city}

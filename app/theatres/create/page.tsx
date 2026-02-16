@@ -144,7 +144,7 @@ export default function CreateTheatrePage() {
 
                             <div>
                                 <ImageUpload
-                                    label="Theatre Image"
+                                    label="Theatre Poster"
                                     value={formData.image}
                                     onUpload={(url) => setFormData(prev => ({ ...prev, image: url }))}
                                     onRemove={() => setFormData(prev => ({ ...prev, image: "" }))}

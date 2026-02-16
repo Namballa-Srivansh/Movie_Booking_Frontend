@@ -24,6 +24,7 @@ interface Theatre {
     city: string;
     pincode: number;
     address?: string;
+    image?: string;
     movies?: Movie[];
     owner: string;
 }
@@ -120,14 +121,30 @@ export default function TheatreDetailsPage() {
 
                 {/* Theatre Header */}
                 <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm mb-8">
-                    <div className="h-48 bg-gradient-to-r from-indigo-900 to-slate-900 relative">
-                        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                            <Building2 className="w-32 h-32 text-white" />
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-black/60 to-transparent flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div className="h-64 md:h-80 relative overflow-hidden group">
+                        {theatre.image ? (
+                            <>
+                                <div className="absolute inset-0 bg-slate-900">
+                                    <img
+                                        src={theatre.image}
+                                        alt={theatre.name}
+                                        className="w-full h-full object-cover opacity-80"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                                </div>
+                            </>
+                        ) : (
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-slate-900">
+                                <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                    <Building2 className="w-32 h-32 text-white" />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between gap-4 z-10">
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{theatre.name}</h1>
-                                <div className="flex items-center gap-2 text-slate-200 text-sm md:text-base">
+                                <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 drop-shadow-md">{theatre.name}</h1>
+                                <div className="flex items-center gap-2 text-slate-200 text-sm md:text-base font-medium drop-shadow-sm">
                                     <MapPin className="w-4 h-4" />
                                     <span>{theatre.address}, {theatre.city} - {theatre.pincode}</span>
                                 </div>
@@ -137,14 +154,14 @@ export default function TheatreDetailsPage() {
                                 <div className="flex gap-3 mt-4 md:mt-0">
                                     <button
                                         onClick={() => router.push(`/theatres/${theatre._id || theatre.id}/edit`)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium"
+                                        className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-lg hover:bg-white/20 transition-colors shadow-sm font-medium"
                                     >
                                         <Edit className="w-4 h-4" />
                                         Edit
                                     </button>
                                     <button
                                         onClick={handleDelete}
-                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors border border-red-100 font-medium"
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-500/80 backdrop-blur-md text-white border border-red-400/20 rounded-lg hover:bg-red-600/90 transition-colors font-medium shadow-sm"
                                     >
                                         <Trash className="w-4 h-4" />
                                         Delete
