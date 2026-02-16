@@ -2,6 +2,8 @@
 
 import { Search, PlayCircle, TrendingUp, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import MovieCard from "@/app/components/MovieCard";
@@ -66,6 +68,21 @@ const movies: Movie[] = [
 ];
 
 export default function HomePage() {
+    const [query, setQuery] = useState("");
+    const router = useRouter();
+
+    const handleSearch = () => {
+        if (query.trim()) {
+            router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleSearch();
+        }
+    };
+
     return (
         <main className="bg-slate-50 min-h-screen text-slate-900 selection:bg-indigo-500/30">
             <Navbar />
@@ -107,10 +124,16 @@ export default function HomePage() {
                             <Search className="text-slate-400 ml-4 w-6 h-6" />
                             <input
                                 type="text"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 placeholder="Search movies, theaters, or genres..."
                                 className="bg-transparent border-none text-slate-900 text-lg w-full focus:outline-none placeholder:text-slate-400 py-2"
                             />
-                            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg">
+                            <button
+                                onClick={handleSearch}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+                            >
                                 Search
                             </button>
                         </div>
