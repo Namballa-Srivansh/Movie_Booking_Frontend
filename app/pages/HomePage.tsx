@@ -1,75 +1,63 @@
 "use client";
 
-import { Search, PlayCircle, TrendingUp, Calendar } from "lucide-react";
+import { Search, PlayCircle, TrendingUp, Calendar, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import MovieCard from "@/app/components/MovieCard";
+import { getAllMovies } from "@/app/services/movie";
 
-type Movie = {
-    id: number;
-    name: string;
-    description: string;
-    casts: string[];
-    trailerUrl: string;
-    language: string;
-    releaseDate: string;
-    director: string;
-    releaseStatus: string;
-};
 
-const movies: Movie[] = [
-    {
-        id: 1,
-        name: "Interstellar Reborn",
-        description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival. The mission takes them beyond the known galaxy.",
-        casts: ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
-        trailerUrl: "#",
-        language: "English",
-        releaseDate: "2026-02-12",
-        director: "Christopher Nolan",
-        releaseStatus: "Now Showing",
-    },
-    {
-        id: 2,
-        name: "Mumbai Heist",
-        description: "A high-stakes thriller set in the heart of Mumbai, where a group of elite thieves plan the biggest bank robbery in history.",
-        casts: ["Shah Rukh Khan", "Deepika Padukone", "John Abraham"],
-        trailerUrl: "#",
-        language: "Hindi",
-        releaseDate: "2026-01-28",
-        director: "Siddharth Anand",
-        releaseStatus: "Now Showing",
-    },
-    {
-        id: 3,
-        name: "Silent Lake",
-        description: "A psychological horror about a family retreat that turns into a nightmare when they discover the dark secrets of the lake house.",
-        casts: ["Emily Blunt", "John Krasinski", "Millicent Simmonds"],
-        trailerUrl: "#",
-        language: "English",
-        releaseDate: "2026-02-02",
-        director: "Jordan Peele",
-        releaseStatus: "Now Showing",
-    },
-    {
-        id: 4,
-        name: "Project Orion",
-        description: "In a future where earth is dying, a secret project aims to terraform Mars. But something ancient wakes up on the red planet.",
-        casts: ["Chris Pratt", "Zoe Saldana", "Dave Bautista"],
-        trailerUrl: "#",
-        language: "English",
-        releaseDate: "2026-02-18",
-        director: "James Gunn",
-        releaseStatus: "Coming Soon",
-    },
-];
 
 export default function HomePage() {
     const [query, setQuery] = useState("");
+    const [movies, setMovies] = useState<any[]>([]);
+    const [upcomingMovies, setUpcomingMovies] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchMovies = async () => {
+            try {
+                // Fetch more movies to ensure we have enough after filtering
+                const response = await getAllMovies(1, 100);
+
+                let moviesData = [];
+                if (response.data && response.data.movies) {
+                    moviesData = response.data.movies;
+                } else if (response.movies) {
+                    moviesData = response.movies;
+                } else if (Array.isArray(response)) {
+                    moviesData = response;
+                } else if (response.data && Array.isArray(response.data)) {
+                    moviesData = response.data;
+                }
+
+                // Filter for "Released" movies as requested and take the first 4
+                const releasedMovies = moviesData
+                    .filter((movie: any) => movie.releaseStatus === "Released")
+                    .slice(0, 4);
+
+                // Filter for "Coming Soon" movies and take the first 4
+                const comingSoonMovies = moviesData
+                    .filter((movie: any) => movie.releaseStatus === "Coming Soon")
+                    .slice(0, 4);
+
+                setMovies(releasedMovies);
+                setUpcomingMovies(comingSoonMovies);
+            } catch (err: any) {
+                console.error("Failed to load movies:", err);
+                setError("Failed to load movies");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMovies();
+    }, []);
 
     const handleSearch = () => {
         if (query.trim()) {
@@ -160,42 +148,82 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {movies.map((movie, idx) => (
-                        <div key={movie.id} className="h-full">
-                            <MovieCard movie={movie} />
-                        </div>
-                    ))}
-                </div>
+
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-20">
+                        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-10 text-red-500">
+                        {error}
+                    </div>
+                ) : movies.length === 0 ? (
+                    <div className="text-center py-10 text-slate-500">
+                        No movies currently showing.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {movies.map((movie) => (
+                            <div key={movie.id || movie._id} className="h-full">
+                                <MovieCard movie={movie} />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </section>
 
-            {/* Upcoming / Trending Section */}
+            {/* Upcoming / Coming Soon Section */}
             <section className="bg-white py-24 border-y border-slate-200">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex items-center justify-between mb-12">
                         <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                            <TrendingUp className="w-8 h-8 text-amber-500" />
-                            Trending This Week
+                            <Calendar className="w-8 h-8 text-indigo-600" />
+                            Coming Soon
                         </h2>
-                        <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">View All</a>
+                        {/* <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">View All</a> */}
                     </div>
 
-                    <div className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="min-w-[300px] snap-center group cursor-pointer">
-                                <div className="h-48 bg-slate-200 rounded-2xl relative overflow-hidden mb-4 shadow-sm">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <div className="absolute bottom-4 left-4">
-                                        <span className="px-3 py-1 bg-white/90 backdrop-blur rounded-lg text-xs font-bold text-indigo-600 shadow-sm">
-                                            COMING SOON
-                                        </span>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-20">
+                            <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+                        </div>
+                    ) : upcomingMovies.length === 0 ? (
+                        <div className="text-center py-10 text-slate-500">
+                            No upcoming movies at the moment.
+                        </div>
+                    ) : (
+                        <div className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x">
+                            {upcomingMovies.map((movie) => (
+                                <div
+                                    key={movie.id || movie._id}
+                                    className="min-w-[300px] snap-center group cursor-pointer"
+                                    onClick={() => router.push(`/movie/${movie.id || movie._id}`)}
+                                >
+                                    <div className="h-48 bg-slate-200 rounded-2xl relative overflow-hidden mb-4 shadow-sm">
+                                        {movie.poster ? (
+                                            <img
+                                                src={movie.poster} // simple src usage, can optimize later if needed
+                                                alt={movie.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-slate-300 flex items-center justify-center text-slate-500">
+                                                No Poster
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="absolute bottom-4 left-4">
+                                            <span className="px-3 py-1 bg-white/90 backdrop-blur rounded-lg text-xs font-bold text-indigo-600 shadow-sm">
+                                                COMING SOON
+                                            </span>
+                                        </div>
                                     </div>
+                                    <h4 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">{movie.name}</h4>
+                                    <p className="text-sm text-slate-500 mt-1">Releasing {movie.releaseDate}</p>
                                 </div>
-                                <h4 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Untitled Action Movie {i}</h4>
-                                <p className="text-sm text-slate-500 mt-1">Releasing March {10 + i}, 2026</p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 

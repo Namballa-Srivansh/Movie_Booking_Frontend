@@ -126,8 +126,7 @@ export default function MovieDetailsPage() {
         <main className="min-h-screen bg-slate-50">
             <Navbar transparent={true} />
 
-            {/* Hero Section */}
-            <div className="relative w-full overflow-hidden bg-slate-900">
+            <div className="relative w-full overflow-hidden bg-slate-900" style={{ height: '480px' }}>
                 {/* Movie Poster Background with visual enhancements */}
                 <div className="absolute inset-0 z-0 bg-slate-900 pointer-events-none">
                     {/* Background Image */}
@@ -135,36 +134,37 @@ export default function MovieDetailsPage() {
                         <img
                             src={getOptimizedImageUrl(movie.poster || movie.posterUrl, 'background') || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"}
                             alt="Background"
-                            className="w-full h-full object-cover object-top opacity-80"
+                            className="w-full h-full object-cover"
+                            style={{ objectPosition: 'center 20%' }}
                         />
                     </div>
 
-                    {/* Gradient Overlay (User Requested Style) */}
+                    {/* Gradient Overlay (BookMyShow Style) */}
                     <div
                         className="absolute inset-0"
                         style={{
-                            background: 'linear-gradient(90deg, rgb(15, 23, 42) 24.97%, rgb(15, 23, 42) 38.3%, rgba(15, 23, 42, 0.04) 97.47%, rgb(15, 23, 42) 100%)'
+                            background: 'linear-gradient(90deg, #0f172a 24.97%, #0f172a 38.3%, rgba(15, 23, 42, 0.04) 97.47%, #0f172a 100%)'
                         }}
                     />
                 </div>
 
-                <div className="relative z-10 container mx-auto px-6 py-12 md:py-20">
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
+                    <div className="flex flex-col md:flex-row gap-8 items-center w-full">
                         {/* Poster Card - Left Side */}
-                        <div className="shrink-0 w-54 md:w-62 rounded-xl overflow-hidden shadow-2xl border border-white/10 mx-auto md:mx-0">
+                        <div className="shrink-0 w-60 md:w-64 rounded-xl overflow-hidden shadow-2xl mx-auto md:mx-0">
                             <img
                                 src={getOptimizedImageUrl(movie.poster || movie.posterUrl, 'poster') || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop"}
                                 alt={movie.name}
                                 className="w-full h-auto object-cover"
                             />
-                            <div className="bg-black text-white text-center py-2 text-xs font-medium uppercase tracking-wider">
+                            <div className="bg-black text-white text-center py-1.5 text-[10px] font-medium uppercase tracking-wider">
                                 In cinemas
                             </div>
                         </div>
 
                         {/* Movie Details - Right Side */}
-                        <div className="flex-1 text-white pt-2">
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
+                        <div className="flex-1 text-white">
+                            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight leading-tight">
                                 {movie.name}
                             </h1>
 

@@ -53,7 +53,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-lg max-w-sm mx-auto w-full flex flex-col h-full"
         >
             {/* Poster / Image Area */}
-            <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`} className="relative h-[320px] bg-slate-200 overflow-hidden shrink-0 block">
+            <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`} className="relative h-[240px] bg-slate-200 overflow-hidden shrink-0 block">
                 {/* Poster Image or Placeholder Gradient */}
                 {movie.poster ? (
                     <img
@@ -98,9 +98,9 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             </Link>
 
             {/* Info Area */}
-            <div className="p-5 flex flex-col grow">
+            <div className="p-4 flex flex-col grow">
                 <Link href={`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`}>
-                    <h3 className="text-xl font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
                         {movie.name}
                     </h3>
                 </Link>
@@ -134,7 +134,7 @@ export default function MovieCard({ movie }: { movie: Movie }) {
 
                 <button
                     onClick={() => router.push(`${ROUTES.MOVIE_DETAILS}/${movie.id || movie._id}`)}
-                    className="w-full mt-5 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-[0.98]"
+                    className="w-full mt-4 bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-xs tracking-wide shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all active:scale-[0.98]"
                 >
                     VIEW MOVIE
                 </button>
