@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getTheatreById, deleteTheatre } from "@/app/services/theatre";
+import { getOptimizedImageUrl } from "@/app/utils/cloudinary";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { Loader2, MapPin, Building2, Film, ArrowLeft, Edit, Trash } from "lucide-react";
@@ -13,7 +14,8 @@ import { ROUTES } from "@/app/routes";
 interface Movie {
     _id: string;
     name: string;
-    posterUrl?: string; // Assuming posterUrl might be available or added later
+    posterUrl?: string;
+    poster?: string;
 }
 
 interface Theatre {
@@ -77,8 +79,9 @@ export default function TheatreDetailsPage() {
     const userId = user?.id || (user as any)?._id;
     const theatreOwnerId = theatre?.owner && typeof theatre.owner === 'object' ? (theatre.owner as any)._id : theatre?.owner;
 
-    // Allow access if user is admin OR if user is owner and IDs match
-    const canEdit = user && theatre && (userRole === "admin" || (userRole === "owner" && userId === theatreOwnerId));
+    // Allow access if user is admin OR if user is owner/client and IDs match (ensure string comparison)
+    const isOwner = userId && theatreOwnerId && String(userId) === String(theatreOwnerId);
+    const canEdit = user && theatre && (userRole === "admin" || (isOwner && (userRole === "owner" || userRole === "client")));
 
 
     if (isLoading) {
@@ -199,10 +202,17 @@ export default function TheatreDetailsPage() {
                                             className="group block bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all p-4"
                                         >
                                             <div className="aspect-[2/3] bg-slate-200 rounded-lg mb-3 overflow-hidden text-center relative">
-                                                {/* Placeholder for movie poster if not available */}
-                                                <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-200">
-                                                    <Film className="w-8 h-8" />
-                                                </div>
+                                                {(movie.poster || movie.posterUrl) ? (
+                                                    <img
+                                                        src={getOptimizedImageUrl(movie.poster || movie.posterUrl, 'poster')}
+                                                        alt={movie.name}
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-200">
+                                                        <Film className="w-8 h-8" />
+                                                    </div>
+                                                )}
                                             </div>
                                             <h3 className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                                                 {movie.name}
