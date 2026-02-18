@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { ROUTES } from "@/app/routes";
 import Navbar from "@/app/components/Navbar";
@@ -12,6 +12,8 @@ import { createBooking } from "@/app/services/booking";
 export default function BookShowPage({ params }: { params: Promise<{ id: string }> }) {
     const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const dateQuery = searchParams.get("date");
     const resolvedParams = use(params);
     const showId = resolvedParams.id;
     const [show, setShow] = useState<any>(null);
@@ -43,6 +45,8 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
             const bookingData = {
                 movieId: show.movieId._id,
                 theatreId: show.theatreId._id,
+                showId: show._id,
+                bookingDate: dateQuery ? new Date(dateQuery) : new Date(), // Use selected date
                 timings: show.timings,
                 noOfSeats: seats,
                 totalCost: show.price * seats,
@@ -61,6 +65,10 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
             setIsBooking(false);
         }
     };
+
+    const formattedDate = dateQuery
+        ? new Date(dateQuery).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
+        : (show?.date || "Today");
 
     if (isLoading) {
         return (
@@ -100,7 +108,7 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-sm text-slate-500 block">Date & Time</label>
-                                        <p className="font-semibold text-slate-800">{show.date} | {show.timings}</p>
+                                        <p className="font-semibold text-slate-800">{formattedDate} | {show.timings}</p>
                                     </div>
                                     <div>
                                         <label className="text-sm text-slate-500 block">Ticket Price</label>

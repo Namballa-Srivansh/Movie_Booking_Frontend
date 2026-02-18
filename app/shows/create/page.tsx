@@ -113,7 +113,7 @@ export default function CreateShowPage() {
             await createShow(payload, token);
 
             alert("Show created successfully!");
-            router.push(ROUTES.SHOWS);
+            router.push(ROUTES.MOVIES);
 
         } catch (err: any) {
             console.error("Failed to create show:", err);
