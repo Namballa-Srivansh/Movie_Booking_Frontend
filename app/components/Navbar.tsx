@@ -17,6 +17,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
     const [scrolled, setScrolled] = useState(false);
 
     const userRole = (user?.userRole || user?.role || "").toLowerCase();
+    const userStatus = (user?.userStatus || user?.status || "").toLowerCase();
     const canCreateMovie = userRole === "owner" || userRole === "admin";
 
     useEffect(() => {
@@ -89,7 +90,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                         )}
 
 
-                        {isAuthenticated && canCreateMovie && (
+                        {isAuthenticated && canCreateMovie && userStatus === 'approved' && (
                             <div className="flex items-center gap-4">
                                 {(pathname.startsWith(ROUTES.MOVIES) || pathname.startsWith("/movie")) && (
                                     <Link
@@ -159,17 +160,8 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     </div>
 
                     {isLoading ? null : isAuthenticated ? (
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={logout}
-                                className={`px-5 py-2 rounded-full border text-sm font-medium transition-all ${isTransparent
-                                    ? "border-slate-500 text-slate-200 hover:bg-white/10 hover:text-white hover:border-white"
-                                    : "border-slate-200 text-slate-700 hover:bg-slate-50"
-                                    }`}
-                            >
-                                Logout
-                            </button>
-                            <Link href={ROUTES.PROFILE} className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 block">
+                        <div className="relative group">
+                            <button className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-0.5 block focus:outline-none">
                                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                                     {user?.profilePicture ? (
                                         <img src={user.profilePicture} alt="Profile" className="w-full h-full object-cover" />
@@ -179,7 +171,32 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                                         </span>
                                     )}
                                 </div>
-                            </Link>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                                <div className="px-4 py-3 border-b border-slate-50">
+                                    <p className="text-sm font-semibold text-slate-900 truncate">{user?.name || "User"}</p>
+                                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                                </div>
+
+                                <Link href={ROUTES.PROFILE} className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                                    Profile
+                                </Link>
+
+                                {userRole === "admin" && (
+                                    <Link href="/admin" className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                                        Admin Dashboard
+                                    </Link>
+                                )}
+
+                                <button
+                                    onClick={logout}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <>
