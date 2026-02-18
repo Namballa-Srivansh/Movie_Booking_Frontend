@@ -6,7 +6,9 @@ import { useAuth } from "@/app/context/AuthContext";
 import { ROUTES } from "@/app/routes";
 import { getBookings } from "@/app/services/booking";
 import Navbar from "@/app/components/Navbar";
-import { Loader2, Calendar, MapPin, Clock, Ticket, CreditCard, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Calendar, MapPin, Clock, Ticket, CreditCard, CheckCircle, XCircle, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function BookingsPage() {
     const { isAuthenticated, isLoading, user } = useAuth();
@@ -38,6 +40,53 @@ export default function BookingsPage() {
             fetchBookings();
         }
     }, [isAuthenticated, isLoading, user, router]);
+
+    const generateTicketPDF = (booking: any) => {
+        const doc = new jsPDF();
+
+        // Add Logo or Header
+        doc.setFontSize(22);
+        doc.setTextColor(79, 70, 229); // Indigo-600
+        doc.text("Movie Booking App", 105, 20, { align: "center" });
+
+        doc.setFontSize(16);
+        doc.setTextColor(30, 41, 59); // Slate-800
+        doc.text("Booking Confirmation", 105, 30, { align: "center" });
+
+        // Add Ticket Details
+        const ticketData = [
+            ["Booking ID", booking._id],
+            ["Movie", typeof booking.movieId === 'object' ? booking.movieId?.name : 'N/A'],
+            ["Theatre", typeof booking.theatreId === 'object' ? booking.theatreId?.name : 'N/A'],
+            ["Date", new Date(booking.createdAt).toLocaleDateString()],
+            ["Time", booking.timings],
+            ["Seats", `${booking.noOfSeats} Seats`],
+            ["Total Amount", `Rs. ${booking.totalCost}`],
+            ["Status", booking.status.toUpperCase()]
+        ];
+
+        autoTable(doc, {
+            startY: 40,
+            head: [['Field', 'Details']],
+            body: ticketData,
+            theme: 'grid',
+            headStyles: { fillColor: [79, 70, 229] },
+            styles: { fontSize: 12, cellPadding: 6 },
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 60 },
+            }
+        });
+
+        // Add Footer
+        const finalY = (doc as any).lastAutoTable.finalY || 150;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Thank you for booking with us!", 105, finalY + 20, { align: "center" });
+        doc.text("Please show this ticket at the counter.", 105, finalY + 26, { align: "center" });
+
+        // Save PDF
+        doc.save(`ticket-${booking._id}.pdf`);
+    };
 
     if (isLoading || loadingBookings) {
         return (
@@ -153,9 +202,18 @@ export default function BookingsPage() {
                                 )}
 
                                 {booking.status === 'SUCCESSFUL' && (
-                                    <div className="mt-6 pt-4 border-t border-slate-50 flex flex-col items-center justify-center text-green-600">
-                                        <CheckCircle className="w-8 h-8 mb-2" />
-                                        <span className="font-medium">Payment Successful</span>
+                                    <div className="mt-6 pt-4 border-t border-slate-50 flex flex-col items-center justify-center gap-3">
+                                        <div className="flex items-center gap-2 text-green-600">
+                                            <CheckCircle className="w-6 h-6" />
+                                            <span className="font-medium">Payment Successful</span>
+                                        </div>
+                                        <button
+                                            onClick={() => generateTicketPDF(booking)}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            Download Ticket
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -166,5 +224,3 @@ export default function BookingsPage() {
         </div>
     );
 }
-
-
