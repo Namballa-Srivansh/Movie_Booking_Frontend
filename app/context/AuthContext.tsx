@@ -29,7 +29,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check local storage on mount
         const initAuth = async () => {
             const storedUser = localStorage.getItem("user");
             if (storedUser) {
@@ -41,10 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     try {
                         const verifiedUser = await verifyUser(parsedUser);
 
-                        // If backend returns a new user object, use it, otherwise use the stored one if valid
                         const userFromBackend = verifiedUser?.data || verifiedUser;
 
-                        // Preserve token if not returned by backend
                         if (userFromBackend && !userFromBackend.token && parsedUser?.token) {
                             userFromBackend.token = parsedUser.token;
                         }
@@ -58,15 +55,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     } catch (verifyError: any) {
                         console.error("Token verification failed:", verifyError);
 
-                        // Fail-open strategy:
-                        // If it's a server error (500) or network error, don't logout immediately.
                         const errorMessage = verifyError.message || "";
                         if (errorMessage.includes("500") || errorMessage.includes("Network Error")) {
                             console.warn("Server invalid or unreachable (500), preserving local session.");
                             setUser(parsedUser);
                             setIsAuthenticated(true);
                         } else {
-                            // Only logout if we are sure the token is invalid (e.g. 401, 403)
                             localStorage.removeItem("user");
                             setUser(null);
                             setIsAuthenticated(false);
@@ -85,7 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         initAuth().finally(() => {
-            // Ensure loading is set to false if it wasn't already (though logic above covers most cases, safety net)
             if (!localStorage.getItem("user")) setIsLoading(false);
         });
     }, []);

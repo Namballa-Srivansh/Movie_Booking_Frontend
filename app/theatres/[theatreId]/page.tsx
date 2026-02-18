@@ -75,13 +75,24 @@ export default function TheatreDetailsPage() {
         }
     };
 
-    const userRole = (user?.userRole || user?.role || "").toLowerCase();
-    const userId = user?.id || (user as any)?._id;
-    const theatreOwnerId = theatre?.owner && typeof theatre.owner === 'object' ? (theatre.owner as any)._id : theatre?.owner;
+    // Robust extraction of user details handling potential nesting (e.g. user.user)
+    const effectiveUser = user?.user || user;
+    const userId = effectiveUser?.id || effectiveUser?._id || effectiveUser?.userId;
+    const userRole = (effectiveUser?.userRole || effectiveUser?.role || "").toLowerCase();
 
-    // Allow access if user is admin OR if user is owner/client and IDs match (ensure string comparison)
+    // Robust extraction of theatre owner ID
+    const theatreOwnerId = theatre?.owner && typeof theatre.owner === 'object'
+        ? (theatre.owner as any)._id || (theatre.owner as any).id
+        : theatre?.owner;
+
+    // Allow access if user is admin OR if user is owner/client and IDs match
     const isOwner = userId && theatreOwnerId && String(userId) === String(theatreOwnerId);
-    const canEdit = user && theatre && (userRole === "admin" || (isOwner && (userRole === "owner" || userRole === "client")));
+
+    // Check permissions
+    const canEdit = effectiveUser && theatre && (
+        userRole === "admin" ||
+        (isOwner && (userRole === "owner" || userRole === "client"))
+    );
 
 
     if (isLoading) {

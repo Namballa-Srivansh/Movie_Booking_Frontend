@@ -23,7 +23,6 @@ export default function MoviesPage() {
                 console.log("Fetched movies response:", response);
 
                 let moviesData = [];
-                // Check if response has data property which contains movies and metadata
                 if (response.data && response.data.movies) {
                     moviesData = response.data.movies;
                     setTotalPages(response.data.totalPages || 0);

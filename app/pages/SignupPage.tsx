@@ -38,7 +38,6 @@ export default function SignupPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error when user types
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: "" }));
         }
@@ -103,8 +102,6 @@ export default function SignupPage() {
             }
         }
     };
-    // ... rest of the component
-
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">

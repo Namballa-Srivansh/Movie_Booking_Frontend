@@ -36,12 +36,10 @@ export default function HomePage() {
                     moviesData = response.data;
                 }
 
-                // Filter for "Released" or "Now Showing" movies and take the first 4
                 const releasedMovies = moviesData
                     .filter((movie: any) => movie.releaseStatus === "Released" || movie.releaseStatus === "Now Showing")
                     .slice(0, 4);
 
-                // Filter for "Coming Soon" movies and take the first 4
                 const comingSoonMovies = moviesData
                     .filter((movie: any) => movie.releaseStatus === "Coming Soon")
                     .slice(0, 4);
