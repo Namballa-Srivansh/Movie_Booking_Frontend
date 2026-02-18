@@ -58,7 +58,6 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                     </span>
                 </Link>
 
-                {/* Desktop Navigation - Hide when search is open on smaller screens if needed, but here filtering visibility */}
                 {!isSearchOpen && (
                     <div className={`hidden md:flex items-center gap-8 text-xl font-medium transition-colors ${isTransparent ? "text-slate-200" : "text-slate-700"}`}>
                         {pathname === ROUTES.MOVIES ? (

@@ -19,6 +19,7 @@ export default function PaymentPage() {
     const [loadingBooking, setLoadingBooking] = useState(true);
     const [processingPayment, setProcessingPayment] = useState(false);
     const [error, setError] = useState("");
+    const [userAmount, setUserAmount] = useState("");
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -46,6 +47,12 @@ export default function PaymentPage() {
 
     const handlePayment = async () => {
         if (!user?.token || !booking) return;
+
+        const amountToPay = Number(userAmount);
+        if (isNaN(amountToPay) || amountToPay < booking.totalCost) {
+            alert(`Please enter an amount equal to or greater than ₹${booking.totalCost}`);
+            return;
+        }
 
         setProcessingPayment(true);
         try {
@@ -140,6 +147,23 @@ export default function PaymentPage() {
                         </div>
 
                         <div className="border-t border-slate-100 pt-6 mt-6">
+                            <div className="space-y-2 mb-6">
+                                <label className="text-sm font-medium text-slate-700">Enter Payment Amount</label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold">₹</span>
+                                    <input
+                                        type="number"
+                                        value={userAmount}
+                                        onChange={(e) => setUserAmount(e.target.value)}
+                                        className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 font-semibold placeholder:font-normal"
+                                        placeholder={`Minimum ${booking.totalCost}`}
+                                    />
+                                </div>
+                                <p className="text-xs text-slate-500">
+                                    Please enter an amount equal to or greater than the total cost.
+                                </p>
+                            </div>
+
                             <div className="flex justify-between items-center mb-6">
                                 <span className="text-lg font-medium text-slate-800">Total Amount</span>
                                 <span className="text-3xl font-bold text-indigo-600">₹{booking.totalCost}</span>

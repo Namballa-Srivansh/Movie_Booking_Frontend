@@ -86,7 +86,6 @@ export default function TheatreShowList({ theatres, selectedDate }: TheatreShowL
                                         </div>
                                     </div>
 
-                                    {/* Tooltip on hover (simple version) */}
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/show:block bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10 text-center">
                                         <div>Rs. {show.price}</div>
                                         <div className="text-[10px] text-slate-300">{show.noOfSeats} Seats Left</div>

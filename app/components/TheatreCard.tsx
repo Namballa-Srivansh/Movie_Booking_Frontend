@@ -36,9 +36,7 @@ const TheatreCard = ({ theatre }: TheatreCardProps) => {
 
         try {
             const response = await getAllShows();
-            const shows = response.data || response; // Adjust based on API response structure
-
-            // Find a show for this theatre and movie
+            const shows = response.data || response; 
             const theatreId = theatre._id || theatre.id;
 
             // Filter shows that match both theatre and movie

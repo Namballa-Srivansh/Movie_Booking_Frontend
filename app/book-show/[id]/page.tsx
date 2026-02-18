@@ -52,8 +52,6 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
                 totalCost: show.price * seats,
             };
 
-            // I'll leave userId out for now and rely on backend/token, or I'll need to update AuthContext to expose user ID.
-
             await createBooking(bookingData, user?.token || "");
 
             // Success
@@ -79,7 +77,6 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
     }
 
     if (!isAuthenticated) {
-        // Redirect to login or show message
         router.push(ROUTES.LOGIN);
         return null;
     }

@@ -37,8 +37,6 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
                 : [...current, value];
 
             const newFilters = { ...prev, [category]: updated };
-            // Defer the parent update to avoid specific render-phase issues, though standard event handlers shouldn't cause this.
-            // However, keeping it purely in the event loop is safe.
             onFilterChange(newFilters);
             return newFilters;
         });
