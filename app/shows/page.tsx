@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { getAllShows } from "@/app/services/show";
 import { getMovieById } from "@/app/services/movie";
@@ -16,6 +16,7 @@ import TheatreShowList from "@/app/components/TheatreShowList";
 
 export default function ShowsPage() {
     const { user, isAuthenticated } = useAuth();
+    const router = useRouter();
     const searchParams = useSearchParams();
     const movieId = searchParams.get("movieId");
 
@@ -32,8 +33,16 @@ export default function ShowsPage() {
         timings: [] as string[]
     });
 
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push(ROUTES.LOGIN);
+        }
+    }, [isLoading, isAuthenticated, router]);
+
     useEffect(() => {
         const fetchData = async () => {
+            // ... existing fetch logic
             setIsLoading(true);
             try {
                 // Fetch Movie Details if movieId is present

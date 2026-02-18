@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { ROUTES } from "@/app/routes";
 import Navbar from "@/app/components/Navbar";
+import SeatSelection from "@/app/components/SeatSelection"; // Import SeatSelection
 import { Loader2 } from "lucide-react";
 import { getShowById } from "@/app/services/show";
 import { createBooking } from "@/app/services/booking";
@@ -17,7 +18,9 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
     const resolvedParams = use(params);
     const showId = resolvedParams.id;
     const [show, setShow] = useState<any>(null);
-    const [seats, setSeats] = useState(1);
+    const [seats, setSeats] = useState(0); // Initialize to 0
+    const [selectedSeats, setSelectedSeats] = useState<string[]>([]); // To store selected seat IDs
+    const [totalCost, setTotalCost] = useState(0); // To store total cost
     const [isBooking, setIsBooking] = useState(false);
     const [error, setError] = useState("");
 
@@ -49,7 +52,8 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
                 bookingDate: dateQuery ? new Date(dateQuery) : new Date(), // Use selected date
                 timings: show.timings,
                 noOfSeats: seats,
-                totalCost: show.price * seats,
+                seats: selectedSeats, // Pass selected seats
+                totalCost: totalCost, // Pass calculated total cost
             };
 
             await createBooking(bookingData, user?.token || "");
@@ -116,51 +120,91 @@ export default function BookShowPage({ params }: { params: Promise<{ id: string 
                         </div>
 
                         {/* Booking Form */}
-                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                            <h2 className="text-xl font-bold text-slate-900 mb-6">Select Seats</h2>
+                        <div className="col-span-1 md:col-span-2 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900 mb-6 text-center">Select Seats</h2>
 
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        Number of Seats
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="10"
-                                        value={seats}
-                                        onChange={(e) => setSeats(Number(e.target.value))}
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-white"
-                                    />
+                            <SeatSelection
+                                bookedSeats={show.bookedSeats || []}
+                                ticketPrices={show.ticketPrice || { recliner: 340, primePlus: 200, prime: 170, classic: 150 }}
+                                onSelectionChange={(selected, cost) => {
+                                    setSeats(selected.length);
+                                    setSelectedSeats(selected); // We need to add this state
+                                    setTotalCost(cost);         // We need to add this state
+                                }}
+                            />
+
+                            <div className="mt-8 max-w-md mx-auto space-y-6">
+                                <div className="bg-white p-4 rounded-lg border border-slate-200 flex justify-between items-center shadow-sm">
+                                    <span className="text-slate-600 font-medium">Selected Seats</span>
+                                    <span className="font-semibold text-slate-900">
+                                        {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
+                                    </span>
                                 </div>
 
-                                <div className="bg-white p-4 rounded-lg border border-slate-200 flex justify-between items-center">
+                                <div className="bg-white p-4 rounded-lg border border-slate-200 flex justify-between items-center shadow-sm">
                                     <span className="text-slate-600 font-medium">Total Cost</span>
                                     <span className="text-2xl font-bold text-indigo-600">
-                                        ₹{show.price * seats}
+                                        ₹{totalCost}
                                     </span>
                                 </div>
 
                                 {error && (
-                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
                                         {error}
                                     </div>
                                 )}
 
-                                <button
-                                    onClick={handleBooking}
-                                    disabled={isBooking}
-                                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    {isBooking ? (
+
+                                {(() => {
+                                    const showDate = dateQuery ? new Date(dateQuery) : new Date(show.date);
+                                    const currentTime = new Date();
+
+                                    // Parse show timing (e.g., "10:00 AM")
+                                    const timingParts = show.timings.match(/(\d+):(\d+)\s*(AM|PM)/);
+                                    if (timingParts) {
+                                        let hours = parseInt(timingParts[1]);
+                                        const minutes = parseInt(timingParts[2]);
+                                        const period = timingParts[3];
+
+                                        if (period === "PM" && hours !== 12) hours += 12;
+                                        if (period === "AM" && hours === 12) hours = 0;
+
+                                        showDate.setHours(hours, minutes, 0, 0);
+                                    }
+
+                                    const isExpired = showDate < currentTime;
+
+                                    return (
                                         <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Processing...
+                                            {isExpired && (
+                                                <div className="p-3 bg-amber-50 text-amber-600 text-sm rounded-lg text-center font-medium">
+                                                    This show has already started or passed.
+                                                </div>
+                                            )}
+
+                                            <button
+                                                onClick={handleBooking}
+                                                disabled={isBooking || selectedSeats.length === 0 || isExpired}
+                                                className={`w-full py-3 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all 
+                                                ${isBooking || selectedSeats.length === 0 || isExpired
+                                                        ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                                                        : "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-xl active:scale-[0.98]"
+                                                    }`}
+                                            >
+                                                {isBooking ? (
+                                                    <>
+                                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                                        Processing...
+                                                    </>
+                                                ) : isExpired ? (
+                                                    "Show Expired"
+                                                ) : (
+                                                    "Confirm Booking"
+                                                )}
+                                            </button>
                                         </>
-                                    ) : (
-                                        "Confirm Booking"
-                                    )}
-                                </button>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>

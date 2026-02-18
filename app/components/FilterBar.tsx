@@ -30,16 +30,14 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
     };
 
     const handleFilterSelect = (category: string, value: string) => {
-        setFilters(prev => {
-            const current = (prev as any)[category];
-            const updated = current.includes(value)
-                ? current.filter((item: string) => item !== value)
-                : [...current, value];
+        const current = (filters as any)[category];
+        const updated = current.includes(value)
+            ? current.filter((item: string) => item !== value)
+            : [...current, value];
 
-            const newFilters = { ...prev, [category]: updated };
-            onFilterChange(newFilters);
-            return newFilters;
-        });
+        const newFilters = { ...filters, [category]: updated };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const clearFilters = () => {
