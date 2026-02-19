@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Navbar from "@/app/components/Navbar";
 import Link from "next/link";
 import { ROUTES } from "@/app/routes";
@@ -14,7 +14,7 @@ import DateSelector from "@/app/components/DateSelector";
 import FilterBar from "@/app/components/FilterBar";
 import TheatreShowList from "@/app/components/TheatreShowList";
 
-export default function ShowsPage() {
+const ShowsContent = () => {
     const { user, isAuthenticated } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -193,5 +193,13 @@ export default function ShowsPage() {
                 </div>
             </div>
         </div>
+    );
+};
+
+export default function ShowsPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>}>
+            <ShowsContent />
+        </Suspense>
     );
 }
