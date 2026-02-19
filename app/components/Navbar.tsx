@@ -176,7 +176,7 @@ export default function Navbar({ transparent = false }: { transparent?: boolean 
                             {/* Dropdown Menu */}
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
                                 <div className="px-4 py-3 border-b border-slate-50">
-                                    <p className="text-sm font-semibold text-slate-900 truncate">{user?.name || "User"}</p>
+                                    <p className="text-sm font-semibold text-slate-900 truncate">{user?.name || "User"} <span className="text-xs text-indigo-500">({userRole})</span></p>
                                     <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                                 </div>
 
