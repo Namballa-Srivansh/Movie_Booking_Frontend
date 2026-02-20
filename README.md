@@ -104,6 +104,3 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 
 3. **Access the Application**
    Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 📄 License
-This project is licensed under the ISC License.
